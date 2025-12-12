@@ -7,7 +7,6 @@ import { Wallet } from "lucide-react";
 import { Coins } from "lucide-react";
 import { FileText } from "lucide-react";
 import { Users } from "lucide-react";
-import { History } from "lucide-react";
 import { Settings } from "lucide-react";
 import { HelpCircle } from "lucide-react";
 import { LogOut } from "lucide-react";
@@ -44,6 +43,11 @@ const ClientDashboard = () => {
   const [pendingReturns, setPendingReturns] = useState(0);
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+  const [referrals, setReferrals] = useState([]);
+  const [referrer, setReferrer] = useState(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const token = localStorage.getItem('access');
 
@@ -88,17 +92,7 @@ const ClientDashboard = () => {
     }
   };
 
-  const fetchPaymentHistory = async () => {
-    try {
-      const response = await apiCall('/history/');
-      if (response.ok) {
-        const data = await response.json();
-        setPaymentHistory(data.payments || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch payment history:', error);
-    }
-  };
+
 
   const fetchUserRentals = async () => {
     try {
@@ -211,7 +205,6 @@ const ClientDashboard = () => {
           setActiveTab('rentals');
           setPaymentStatus('');
           setPhoneNumber('');
-          fetchPaymentHistory();
           setIsLoading(false);
         } else if (attempts > 60) {
           clearInterval(pollInterval);
@@ -234,7 +227,6 @@ const ClientDashboard = () => {
   useEffect(() => {
     if (token) {
       fetchBalance();
-      fetchPaymentHistory();
       fetchUserRentals();
       const fetchStats = async () => {
         try {
@@ -303,7 +295,6 @@ const ClientDashboard = () => {
           const data = await res.json();
           setProfile(data);
           if (data.full_name) setClientName(data.full_name);
-          if (data.phone_number) setPhoneNumber(data.phone_number);
         } else {
           setProfile(null);
         }
@@ -330,6 +321,67 @@ const ClientDashboard = () => {
     fetchMaintenance();
   }, []);
 
+  // Fetch referral data
+  const fetchReferralData = async () => {
+    try {
+      setReferralLoading(true);
+
+      // Fetch referral code
+      const codeRes = await fetch(`${API_BASE_URL}/api/auth/referrals/code/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (codeRes.ok) {
+        const codeData = await codeRes.json();
+        setReferralCode(codeData.referral_code);
+      }
+
+      // Fetch referral history (who this user referred)
+      const historyRes = await fetch(`${API_BASE_URL}/api/auth/referrals/history/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        setReferrals(historyData.referrals || []);
+      }
+
+      // Fetch referrer info (who referred this user)
+      const refByRes = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (refByRes.ok) {
+        const profileData = await refByRes.json();
+        if (profileData.referred_by) {
+          setReferrer(profileData.referred_by);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch referrals:", error);
+    } finally {
+      setReferralLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchReferralData();
+  }, [token]);
+
+  // Copy referral link
+  const copyToClipboard = () => {
+    const link = `${window.location.origin}/referral/${referralCode}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const StatCard = ({ title, value, subtitle, icon: Icon, gradient = false }) => (
     <div className={`${gradient ? 'bg-gradient-to-br from-green-600 to-emerald-600' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border ${gradient ? 'border-green-500' : 'border-gray-200'}`}>
       <div className="flex items-start justify-between mb-3">
@@ -345,13 +397,12 @@ const ClientDashboard = () => {
     { id: 'rentals', label: 'My Rentals', icon: FileText },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'rent', label: 'Rent Currency', icon: Coins },
-    { id: 'referrals', label: 'Referrals', link: '/referrals', icon: Users },
-    { id: 'history', label: 'Payment History', link: '/home', icon: History },
+    { id: 'referrals', label: 'Referrals', icon: Users },
     { id: 'account', label: 'Account Settings', link: '/kyc', icon: Settings },
     { id: 'support', label: 'Support', icon: HelpCircle }
   ];
 
-  const doubledMoney = activeRentals.reduce((sum, rental) => sum + (rental.expectedReturn || 0), 0);
+  const doubledMoney = activeRentals.reduce((sum, rental) => sum + (rental.expected_return || 0), 0);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -648,57 +699,6 @@ const ClientDashboard = () => {
           </div>
         );
 
-      case 'history':
-        return (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold mb-2 text-gray-900">Payment History</h2>
-                <p className="text-gray-600">View all your payment transactions</p>
-              </div>
-              <History className="w-8 h-8 text-green-600 hidden md:block" />
-            </div>
-            {paymentHistory.length > 0 ? (
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Currency</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {paymentHistory.map((payment, index) => (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm text-gray-900">{new Date(payment.created_at).toLocaleDateString()}</td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">{payment.currency}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">KES {payment.amount}</td>
-                          <td className="px-6 py-4 text-sm">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                              payment.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {payment.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-lg">
-                <History className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">No Payment History</h3>
-                <p className="text-gray-600">Your payment transactions will appear here</p>
-              </div>
-            )}
-          </div>
-        );
-
       case 'support':
         return <Contact isDashboard={true} />;
 
@@ -775,11 +775,11 @@ const ClientDashboard = () => {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
-                        activeTab === item.id 
-                          ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      } group`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
+                activeTab === item.id
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              } group`}
                     >
                       <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                       <span>{item.label}</span>
