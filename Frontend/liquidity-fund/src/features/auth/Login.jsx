@@ -27,24 +27,57 @@ const Login = () => {
 
   const handleLoginNavigation = async (access, refresh) => {
     try {
+      // Store tokens immediately
       localStorage.setItem("access", access);
       localStorage.setItem("refresh", refresh);
 
-      const res = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      if (!res.ok) throw new Error("Failed to fetch profile");
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      const user = await res.json();
-      localStorage.setItem("profile", JSON.stringify(user));
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
+          headers: {
+            Authorization: `Bearer ${access}`,
+            "Content-Type": "application/json"
+          },
+          signal: controller.signal,
+        });
 
-      if (user.is_superuser) {
-        navigate("/admin-dashboard");
-      } else {
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          // If profile fetch fails, still navigate but show warning
+          console.warn("Profile fetch failed, proceeding with navigation");
+          toast.error("Login successful but profile loading failed. Please refresh the page.");
+          navigate("/client-dashboard");
+          return;
+        }
+
+        const user = await res.json();
+        localStorage.setItem("profile", JSON.stringify(user));
+
+        // Navigate based on user role
+        if (user.is_superuser) {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/client-dashboard");
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.warn("Profile fetch timed out, proceeding with navigation");
+          toast.error("Login successful but profile loading timed out. Please refresh the page.");
+        } else {
+          console.error("Profile fetch error:", fetchError);
+          toast.error("Login successful but profile loading failed. Please refresh the page.");
+        }
+        // Still navigate even if profile fetch fails
         navigate("/client-dashboard");
       }
     } catch (err) {
-      toast.error(err.message);
+      console.error("Login navigation error:", err);
+      toast.error("Login failed: " + err.message);
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Contact from "../../components/Contact";
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from "../../lib/api";
+import toast from "react-hot-toast";
 import { LayoutDashboard } from "lucide-react";
 import { Wallet } from "lucide-react";
 import { Coins } from "lucide-react";
@@ -326,39 +327,40 @@ const ClientDashboard = () => {
     try {
       setReferralLoading(true);
 
-      // Fetch referral code
-      const codeRes = await fetch(`${API_BASE_URL}/api/auth/referrals/code/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Fetch all referral data in parallel for better performance
+      const [codeRes, historyRes, profileRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/auth/referrals/code/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        fetch(`${API_BASE_URL}/api/auth/referrals/history/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        fetch(`${API_BASE_URL}/api/auth/profile/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+      ]);
+
       if (codeRes.ok) {
         const codeData = await codeRes.json();
         setReferralCode(codeData.referral_code);
       }
 
-      // Fetch referral history (who this user referred)
-      const historyRes = await fetch(`${API_BASE_URL}/api/auth/referrals/history/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
       if (historyRes.ok) {
         const historyData = await historyRes.json();
         setReferrals(historyData.referrals || []);
       }
 
-      // Fetch referrer info (who referred this user)
-      const refByRes = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (refByRes.ok) {
-        const profileData = await refByRes.json();
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
         if (profileData.referred_by) {
           setReferrer(profileData.referred_by);
         }
@@ -382,6 +384,30 @@ const ClientDashboard = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/delete-account/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Account deleted successfully');
+        localStorage.clear();
+        window.location.href = '/';
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.detail || 'Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      toast.error('Failed to delete account. Please try again.');
+    }
+  };
+
   const StatCard = ({ title, value, subtitle, icon: Icon, gradient = false }) => (
     <div className={`${gradient ? 'bg-gradient-to-br from-green-600 to-emerald-600' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border ${gradient ? 'border-green-500' : 'border-gray-200'}`}>
       <div className="flex items-start justify-between mb-3">
@@ -398,7 +424,7 @@ const ClientDashboard = () => {
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'rent', label: 'Rent Currency', icon: Coins },
     { id: 'referrals', label: 'Referrals', icon: Users },
-    { id: 'account', label: 'Account Settings', link: '/kyc', icon: Settings },
+    { id: 'account', label: 'Account Settings', icon: Settings },
     { id: 'support', label: 'Support', icon: HelpCircle }
   ];
 
@@ -696,6 +722,231 @@ const ClientDashboard = () => {
                 </button>
               </div>
             )}
+          </div>
+        );
+
+      case 'referrals':
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 text-gray-900">Referral Program</h2>
+                <p className="text-gray-600">Share your referral code and earn rewards</p>
+              </div>
+              <Users className="w-8 h-8 text-green-600 hidden md:block" />
+            </div>
+
+            {referralLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader className="w-8 h-8 animate-spin text-green-600 mr-3" />
+                <span className="text-gray-600">Loading referrals...</span>
+              </div>
+            ) : (
+              <>
+                {/* Referral Code Section */}
+                <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Your Referral Code</h3>
+                    <p className="text-gray-600">Share this code with friends to earn rewards</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-4 rounded-xl border-2 border-green-300">
+                      <span className="text-2xl font-mono font-bold text-green-800">
+                        {referralCode || "N/A"}
+                      </span>
+                    </div>
+                    <button
+                      onClick={copyToClipboard}
+                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-md ${
+                        copied
+                          ? "bg-green-500 text-white"
+                          : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
+                      }`}
+                    >
+                      {copied ? "Copied! ✓" : "Copy Link"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <StatCard
+                    title="Total Referrals"
+                    value={referrals.length}
+                    icon={Users}
+                    gradient={true}
+                  />
+                  <StatCard
+                    title="Completed"
+                    value={referrals.filter(ref => ref.status === "completed").length}
+                    icon={CheckCircle}
+                  />
+                  <StatCard
+                    title="Total Earnings"
+                    value={`KES ${referrals.reduce((sum, ref) => sum + (ref.reward || 0), 0)}`}
+                    icon={TrendingUp}
+                  />
+                </div>
+
+                {/* Referral History */}
+                <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <Users className="w-6 h-6 mr-3 text-green-600" />
+                    People You've Referred
+                  </h3>
+
+                  {referrer && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                        <span className="text-blue-900 font-medium">
+                          You were referred by: {referrer.full_name} ({referrer.email})
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {referrals.length > 0 ? (
+                    <div className="space-y-4">
+                      {referrals.map((ref, index) => (
+                        <div key={index} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900">
+                                {ref.referred_name || ref.full_name || ref.username || ref.name || "Anonymous User"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {ref.referred_email || ref.email || ref.user_email || ""}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {ref.mobile || ref.phone || ref.user_mobile || "N/A"}
+                              </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                              <div className="text-sm text-gray-600">
+                                {ref.created_at
+                                  ? new Date(ref.created_at).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })
+                                  : ref.date_joined
+                                    ? new Date(ref.date_joined).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                      })
+                                    : "N/A"}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+                                    ref.status === "completed"
+                                      ? "bg-green-100 text-green-800 border border-green-200"
+                                      : "bg-amber-100 text-amber-800 border border-amber-200"
+                                  }`}
+                                >
+                                  {ref.status || "pending"}
+                                </span>
+                                <span className="text-green-700 font-bold">
+                                  {ref.reward || 0} KES
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                      <h4 className="text-lg font-semibold text-gray-700 mb-2">No referrals yet</h4>
+                      <p className="text-gray-500">Start sharing your referral code to earn rewards!</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        );
+
+      case 'account':
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 text-gray-900">Account Settings</h2>
+                <p className="text-gray-600">Manage your account preferences and security</p>
+              </div>
+              <Settings className="w-8 h-8 text-gray-600 hidden md:block" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Profile Information */}
+              <div className="bg-red-50 rounded-xl p-6 border border-red-200">
+                <h3 className="text-xl font-bold text-red-900 mb-4">Profile Information</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-red-800">Full Name</label>
+                    <p className="text-red-700">{profile?.full_name || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-red-800">Email</label>
+                    <p className="text-red-700">{profile?.email || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-red-800">Phone</label>
+                    <p className="text-red-700">{profile?.phone || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Actions */}
+              <div className="bg-red-50 rounded-xl p-6 border border-red-200">
+                <h3 className="text-xl font-bold text-red-900 mb-4">Account Actions</h3>
+                <div className="space-y-4">
+                  <button
+                    onClick={() => window.location.href = '/kyc'}
+                    className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                  >
+                    Update KYC Information
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                        // Add delete account functionality here
+                        handleDeleteAccount();
+                      }
+                    }}
+                    className="w-full bg-red-800 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-900 transition-colors"
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="bg-red-100 rounded-xl p-6 border border-red-300">
+              <h3 className="text-xl font-bold text-red-900 mb-4 flex items-center">
+                <Shield className="w-6 h-6 mr-2" />
+                Danger Zone
+              </h3>
+              <p className="text-red-800 mb-4">
+                Deleting your account will permanently remove all your data, including rentals, balance, and referral history.
+                This action cannot be undone.
+              </p>
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you absolutely sure you want to delete your account? This will permanently delete all your data.')) {
+                    handleDeleteAccount();
+                  }
+                }}
+                className="bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              >
+                Permanently Delete Account
+              </button>
+            </div>
           </div>
         );
 

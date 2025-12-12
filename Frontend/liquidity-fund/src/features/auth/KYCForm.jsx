@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../lib/api";
 
-const KYCForm = () => {
+const KYCForm = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -22,7 +22,9 @@ const KYCForm = () => {
   const [success, setSuccess] = useState(false);
 
   const handleBackClick = () => {
-    navigate("/client-dashboard");
+    if (!isEmbedded) {
+      navigate("/client-dashboard");
+    }
   };
 
   const getToken = () => {
@@ -220,8 +222,8 @@ const KYCForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-800 py-4 sm:py-8 md:py-12 px-3 sm:px-6 lg:px-8 animate-in fade-in duration-700">
-      <div className="max-w-6xl mx-auto">
+    <div className={`${isEmbedded ? 'bg-transparent' : 'min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-800 py-4 sm:py-8 md:py-12'} px-3 sm:px-6 lg:px-8 animate-in fade-in duration-700`}>
+      <div className={`${isEmbedded ? 'w-full' : 'max-w-6xl mx-auto'}`}>
         {/* Header Section */}
         <div className="mb-6 sm:mb-8 animate-in slide-in-from-top-4 duration-500 delay-200">
           <button
@@ -261,46 +263,49 @@ const KYCForm = () => {
           </div>
         </div>
 
-        {/* Info Banner */}
-        <div className="mb-6 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-4 sm:p-6">
-          <div className="flex items-start space-x-3">
-            <div className="shrink-0 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground mb-1">Why do we need this information?</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                KYC (Know Your Customer) verification helps us comply with financial regulations, prevent fraud, 
-                and ensure the security of your account. Your information is encrypted and stored securely according 
-                to industry standards and data protection laws.
-              </p>
+        {/* Info Banner - Only show when not embedded */}
+        {!isEmbedded && (
+          <div className="mb-6 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-4 sm:p-6">
+            <div className="flex items-start space-x-3">
+              <div className="shrink-0 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 mb-1">Why do we need this information?</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  KYC (Know Your Customer) verification helps us comply with financial regulations, prevent fraud,
+                  and ensure the security of your account. Your information is encrypted and stored securely according
+                  to industry standards and data protection laws.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Alert Messages */}
+
         {error && (
-          <div className="mb-6 bg-destructive/10 border-l-4 border-destructive rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mb-6 bg-red-50 border-l-4 border-red-200 rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="p-4 flex items-start">
-              <svg className="w-5 h-5 text-destructive mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              <p className="text-destructive font-medium text-sm sm:text-base">{error}</p>
+              <p className="text-red-600 font-medium text-sm sm:text-base">{error}</p>
             </div>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 bg-success/10 border-l-4 border-success rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mb-6 bg-green-50 border-l-4 border-green-200 rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="p-4 flex items-start">
-              <svg className="w-5 h-5 text-success mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="text-success font-semibold text-sm sm:text-base">KYC details updated successfully!</p>
-                <p className="text-success/80 text-sm mt-0.5">Your information has been securely saved.</p>
+                <p className="text-green-600 font-semibold text-sm sm:text-base">KYC details updated successfully!</p>
+                <p className="text-green-600/80 text-sm mt-0.5">Your information has been securely saved.</p>
               </div>
             </div>
           </div>
@@ -324,18 +329,19 @@ const KYCForm = () => {
                 <div className="space-y-5 sm:space-y-6">
                   {/* Full Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Full Legal Name
                     </label>
                     <input
                       name="full_name"
                       value={formData.full_name}
                       onChange={handleChange}
-                      className={`w-full border-2 ${fieldErrors.full_name ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground`}
+                      className={`w-full border-2 ${fieldErrors.full_name ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500`}
                       placeholder="Enter your full legal name"
                     />
+
                     {fieldErrors.full_name && (
-                      <p className="mt-1.5 text-sm text-destructive flex items-center">
+                      <p className="mt-1.5 text-sm text-red-600 flex items-center">
                         <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
@@ -347,7 +353,7 @@ const KYCForm = () => {
                   {/* Email & Phone */}
                   <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Email Address
                       </label>
                       <input
@@ -355,11 +361,12 @@ const KYCForm = () => {
                         value={formData.email}
                         type="email"
                         onChange={handleChange}
-                        className={`w-full border-2 ${fieldErrors.email ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground`}
+                        className={`w-full border-2 ${fieldErrors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500`}
                         placeholder="john@example.com"
                       />
+
                       {fieldErrors.email && (
-                        <p className="mt-1.5 text-sm text-destructive flex items-center">
+                        <p className="mt-1.5 text-sm text-red-600 flex items-center">
                           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                           </svg>
@@ -369,18 +376,19 @@ const KYCForm = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Phone Number
                       </label>
                       <input
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className={`w-full border-2 ${fieldErrors.phone ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground`}
+                        className={`w-full border-2 ${fieldErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500`}
                         placeholder="+254 700 000 000"
                       />
+
                       {fieldErrors.phone && (
-                        <p className="mt-1.5 text-sm text-destructive flex items-center">
+                        <p className="mt-1.5 text-sm text-red-600 flex items-center">
                           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                           </svg>
@@ -392,7 +400,7 @@ const KYCForm = () => {
 
                   {/* Password */}
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Update Password
                     </label>
                     <input
@@ -400,7 +408,7 @@ const KYCForm = () => {
                       value={formData.password}
                       type="password"
                       onChange={handleChange}
-                      className={`w-full border-2 ${fieldErrors.password ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground`}
+                      className={`w-full border-2 ${fieldErrors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500`}
                       placeholder="Enter new password (leave blank to keep current)"
                     />
                     {fieldErrors.password && (
@@ -416,14 +424,14 @@ const KYCForm = () => {
                   {/* ID Number & DOB */}
                   <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         National ID / Passport Number
                       </label>
                       <input
                         name="id_number"
                         value={formData.id_number}
                         onChange={handleChange}
-                        className={`w-full border-2 ${fieldErrors.id_number ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground`}
+                        className={`w-full border-2 ${fieldErrors.id_number ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500`}
                         placeholder="Enter ID or passport number"
                       />
                       {fieldErrors.id_number && (
@@ -437,7 +445,7 @@ const KYCForm = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Date of Birth
                       </label>
                       <input
@@ -446,7 +454,7 @@ const KYCForm = () => {
                         value={formData.date_of_birth}
                         onChange={handleChange}
                         max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-                        className={`w-full border-2 ${fieldErrors.date_of_birth ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background`}
+                        className={`w-full border-2 ${fieldErrors.date_of_birth ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white`}
                       />
                       {fieldErrors.date_of_birth && (
                         <p className="mt-1.5 text-sm text-destructive flex items-center">
@@ -461,7 +469,7 @@ const KYCForm = () => {
 
                   {/* Address */}
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Residential Address
                     </label>
                     <textarea
@@ -469,7 +477,7 @@ const KYCForm = () => {
                       value={formData.address}
                       onChange={handleChange}
                       rows={3}
-                      className={`w-full border-2 ${fieldErrors.address ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'} focus:ring-4 focus:ring-primary/10 rounded-lg px-4 py-3 transition-all outline-none text-foreground bg-background placeholder:text-muted-foreground resize-none`}
+                      className={`w-full border-2 ${fieldErrors.address ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-4 focus:ring-blue-500/10 rounded-lg px-4 py-3 transition-all outline-none text-gray-900 bg-white placeholder:text-gray-500 resize-none`}
                       placeholder="Street address, apartment/unit number, city, postal code"
                     />
                     {fieldErrors.address && (
@@ -519,114 +527,119 @@ const KYCForm = () => {
             </div>
           </div>
 
-          {/* Sidebar Info */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Security Info */}
-            <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border p-5">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
+          {/* Sidebar Info - Only show when not embedded */}
+          {!isEmbedded && (
+            <div className="lg:col-span-1 space-y-6">
+              {/* Security Info */}
+              <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border p-5">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-foreground">Data Security</h3>
                 </div>
-                <h3 className="font-semibold text-foreground">Data Security</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  256-bit SSL encryption
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  GDPR compliant storage
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  No data sold to third parties
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Regular security audits
-                </li>
-              </ul>
-            </div>
 
-            {/* Verification Benefits */}
-            <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border p-5">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    256-bit SSL encryption
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    GDPR compliant storage
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    No data sold to third parties
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-primary mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Regular security audits
+                  </li>
+                </ul>
+              </div>
+
+              {/* Verification Benefits */}
+              <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border p-5">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-foreground">Verification Benefits</h3>
                 </div>
-                <h3 className="font-semibold text-foreground">Verification Benefits</h3>
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Higher transaction limits
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Enhanced account security
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Access to premium features
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Priority customer support
+                  </li>
+                </ul>
               </div>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Higher transaction limits
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Enhanced account security
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Access to premium features
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-accent mr-2 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Priority customer support
-                </li>
-              </ul>
-            </div>
 
-            {/* Help Section */}
-            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl border border-primary/20 p-5">
-              <div className="flex items-center space-x-2 mb-3">
-                <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                </svg>
-                <h3 className="font-semibold text-foreground">Need Help?</h3>
+              {/* Help Section */}
+              <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl border border-primary/20 p-5">
+                <div className="flex items-center space-x-2 mb-3">
+                  <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                  <h3 className="font-semibold text-foreground">Need Help?</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  If you have questions about the KYC process, our support team is here to assist you.
+                </p>
+                <a href="/support" className="inline-flex items-center text-sm font-semibold text-primary hover:text-accent transition-colors">
+                  Contact Support
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                If you have questions about the KYC process, our support team is here to assist you.
-              </p>
-              <a href="/support" className="inline-flex items-center text-sm font-semibold text-primary hover:text-accent transition-colors">
-                Contact Support
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-8 text-center">
-          <div className="inline-flex items-center space-x-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border">
-            <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <span>All information is encrypted and securely stored</span>
+        {/* Footer Info - Only show when not embedded */}
+        {!isEmbedded && (
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center space-x-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border">
+              <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span>All information is encrypted and securely stored</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
