@@ -117,7 +117,7 @@ const Login = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-green-900 via-green-100 to-green-300 p-2 md:p-4">
+    <div className="fixed inset-0 bg-gradient-to-br from-green-900 via-green-100 to-green-300 p-2 md:p-4">
       {/* Back Arrow at top left, outside the container */}
       <Link
         to="/"
@@ -127,7 +127,78 @@ const Login = () => {
         <ArrowLeft size={20} className="md:w-6 md:h-6" />
         <span className="font-semibold text-sm md:text-base">Back to Home</span>
       </Link>
-      <div className="w-full max-w-md bg-green-50/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 md:p-6 space-y-4 md:space-y-6 border-2 border-green-900 relative">
+
+      {/* Two-column layout */}
+      <div className="flex h-full">
+        {/* Left Side: Descriptive Content */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
+          <div className="text-center animate-fade-in">
+            <div className="mb-8">
+              <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <Sparkles className="text-white w-10 h-10" />
+              </div>
+              <h1 className="text-4xl font-bold text-green-900 mb-4 animate-slide-up">
+                Welcome to LiquiInvest KE
+              </h1>
+              <p className="text-lg text-green-700 mb-6 animate-slide-up-delayed">
+                Kenya's Premier Investment Revolution
+              </p>
+            </div>
+
+            <div className="space-y-6 text-left max-w-md mx-auto">
+              <div className="flex items-start space-x-4 animate-slide-in-left">
+                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Shield className="text-white w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1">Guaranteed 100% Returns</h3>
+                  <p className="text-green-700 text-sm">Double your money in just 20 days with our revolutionary investment model.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 animate-slide-in-left-delayed">
+                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User className="text-white w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1">M-Pesa Instant Deposits</h3>
+                  <p className="text-green-700 text-sm">Seamless mobile money integration - deposit and withdraw with ease.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 animate-slide-in-left-delayed-2">
+                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Lock className="text-white w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1">Bank-Level Security</h3>
+                  <p className="text-green-700 text-sm">256-bit encryption and CBK regulation ensure your investments are safe.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 animate-slide-in-left-delayed-3">
+                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Mail className="text-white w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1">Earn by Referring</h3>
+                  <p className="text-green-700 text-sm">Share with friends and earn 50% commission on their investments.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center space-x-2 bg-green-100 px-4 py-2 rounded-full animate-pulse">
+                <span className="text-green-800 font-semibold">10,000+ Happy Investors</span>
+                <span className="text-2xl">🇰🇪</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center">
+          <div className="w-full max-w-md bg-green-50/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 md:p-6 space-y-4 md:space-y-6 border-2 border-green-900 relative animate-fade-in">
         {/* Header */}
         <div className="text-center mt-6 md:mt-8">
           <div className="flex justify-center items-center gap-2">
@@ -218,7 +289,46 @@ const Login = () => {
             Register here
           </Link>
         </p>
+          </div>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slide-up {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          from { transform: translateX(-30px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        .animate-slide-up {
+          animation: slide-up 1s ease-out;
+        }
+        .animate-slide-up-delayed {
+          animation: slide-up 1s ease-out 0.2s both;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.8s ease-out;
+        }
+        .animate-slide-in-left-delayed {
+          animation: slide-in-left 0.8s ease-out 0.2s both;
+        }
+        .animate-slide-in-left-delayed-2 {
+          animation: slide-in-left 0.8s ease-out 0.4s both;
+        }
+        .animate-slide-in-left-delayed-3 {
+          animation: slide-in-left 0.8s ease-out 0.6s both;
+        }
+      `}</style>
     </div>
   );
 };

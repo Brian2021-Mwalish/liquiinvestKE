@@ -155,7 +155,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-2 sm:p-4 md:p-6"
+    <div className="h-screen w-full flex p-2 sm:p-4 md:p-6 overflow-hidden"
       style={{
         background: "linear-gradient(135deg, #e6f4ea 0%, #b7e4c7 50%, #1b4332 100%)",
       }}
@@ -176,7 +176,77 @@ const Register = () => {
         <span style={{ fontWeight: 700, textShadow: "0 2px 8px #14532d55" }}>Back to Home</span>
       </Link>
 
-      <div className="w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
+      {/* Two-column layout */}
+      <div className="flex h-full w-full">
+        {/* Left Side: Descriptive Content */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6">
+          <div className="text-center animate-fade-in max-w-md">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <User className="text-white w-8 h-8" />
+              </div>
+              <h1 className="text-3xl font-bold text-green-900 mb-3 animate-slide-up">
+                Join LiquiInvest KE
+              </h1>
+              <p className="text-lg text-green-700 mb-4 animate-slide-up-delayed">
+                Start Your Investment Journey
+              </p>
+            </div>
+
+            <div className="space-y-4 text-left max-w-sm mx-auto">
+              <div className="flex items-start space-x-3 animate-slide-in-left">
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1 text-sm">100% Returns Guaranteed</h3>
+                  <p className="text-green-700 text-xs">Double your investment in just 20 days.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 animate-slide-in-left-delayed">
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Mail className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1 text-sm">M-Pesa Integration</h3>
+                  <p className="text-green-700 text-xs">Easy deposits and withdrawals.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 animate-slide-in-left-delayed-2">
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Lock className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1 text-sm">Bank-Level Security</h3>
+                  <p className="text-green-700 text-xs">Your investments are fully protected.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 animate-slide-in-left-delayed-3">
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-green-900 mb-1 text-sm">Referral Bonuses</h3>
+                  <p className="text-green-700 text-xs">Earn by inviting friends.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <div className="inline-flex items-center space-x-2 bg-green-100 px-3 py-1 rounded-full animate-pulse">
+                <span className="text-green-800 font-semibold text-sm">Join 10,000+ Investors</span>
+                <span className="text-lg">🇰🇪</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Register Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center">
+          <div className="w-full max-w-md animate-fade-in p-2">
 
 
         {/* Header */}
@@ -190,19 +260,19 @@ const Register = () => {
         </div>
 
         {/* Main Form Container */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl border border-green-200 p-3 md:p-4 sm:p-6 md:p-8 lg:p-10 transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-1 mx-auto max-w-3xl">
-          
+        <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-green-200 p-3 transform transition-all duration-300 hover:shadow-2xl mx-auto max-w-md">
+
           {/* Welcome Message */}
-          <div className="text-center mb-4 md:mb-6 sm:mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mb-4">
-              <User className="w-6 h-6 md:w-8 md:h-8 sm:w-10 sm:h-10 text-white" />
+          <div className="text-center mb-3">
+            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mb-2">
+              <User className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-lg md:text-xl sm:text-2xl font-semibold text-green-900 mb-2">Create Your Account</h2>
-            <p className="text-xs md:text-sm sm:text-base text-green-700">Please fill in your details to get started</p>
+            <h2 className="text-base font-semibold text-green-900 mb-1">Create Your Account</h2>
+            <p className="text-xs text-green-700">Please fill in your details</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5 sm:space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             {/* Full Name Field */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 mb-2 font-semibold text-green-700 text-sm sm:text-base">
@@ -359,23 +429,22 @@ const Register = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading || isSubmitting || !isValid}
-                className="w-full group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base transition-all duration-300 hover:from-green-700 hover:to-emerald-700 hover:-translate-y-1 hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-1">
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Creating Account...
+                      <Loader2 className="animate-spin" size={16} />
+                      Creating...
                     </>
                   ) : (
                     <>
-                      <User className="w-5 h-5" />
-                      Create My Account
+                      <User className="w-4 h-4" />
+                      Create Account
                     </>
                   )}
                 </div>
@@ -385,16 +454,18 @@ const Register = () => {
         </div>
 
         {/* Sign In Link */}
-        <div className="text-center">
-          <p className="text-sm sm:text-base text-gray-600">
+        <div className="text-center mt-2">
+          <p className="text-xs text-gray-600">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline transform hover:scale-105 inline-block"
+              className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline"
             >
               Sign in here
             </Link>
           </p>
+        </div>
+          </div>
         </div>
       </div>
 
@@ -431,12 +502,38 @@ const Register = () => {
         }
 
         @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slide-up {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          from { transform: translateX(-30px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
 
         .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
+          animation: fade-in 1s ease-out;
+        }
+        .animate-slide-up {
+          animation: slide-up 1s ease-out;
+        }
+        .animate-slide-up-delayed {
+          animation: slide-up 1s ease-out 0.2s both;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.8s ease-out;
+        }
+        .animate-slide-in-left-delayed {
+          animation: slide-in-left 0.8s ease-out 0.2s both;
+        }
+        .animate-slide-in-left-delayed-2 {
+          animation: slide-in-left 0.8s ease-out 0.4s both;
+        }
+        .animate-slide-in-left-delayed-3 {
+          animation: slide-in-left 0.8s ease-out 0.6s both;
         }
 
         @media (max-width: 768px) {

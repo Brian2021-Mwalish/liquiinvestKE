@@ -1,20 +1,14 @@
-# KYC Form Update Tasks
+# Landing Page Updates
 
-## Current Task: Update KYC Form with Green Theme, Animations, and Distinguishable Inputs
+## Tasks
+- [x] Swap hero section positions: Move "Calculate Your Returns" card to left, "Turn KES 100 Into KES 200 in Just 20 Days" text to right
+- [x] Change spinning wheel prizes from money bonuses to points (e.g., 500 Points instead of KES 500 Bonus)
+- [x] Update spinning section text to emphasize it's a game awarding points
+- [x] Remove the entire STATS section (Trust Indicators) showing "10,000+ Active Investors", etc.
 
-### Steps to Complete:
-1. **Edit KYCForm.jsx**:
-   - Replace primary color classes with dark green equivalents (e.g., bg-green-800, text-green-800).
-   - Add animations: animate-in for form sections, hover effects on buttons, pulse for loading states.
-   - Make inputs distinguishable: Add green borders on focus (border-green-500), subtle green background (bg-green-50), and shadows.
-   - Ensure all styling is within the component code using Tailwind classes.
+# Navigation Performance Updates
 
-2. **Test Changes**:
-   - Run the development server to verify the green theme is applied.
-   - Check animations are working (e.g., form fade-in, button hover).
-   - Confirm inputs are visually distinct when focused.
-
-### Notes:
-- All styling must remain within KYCForm.jsx code.
-- Use Tailwind's green color palette for consistency.
-- Keep the rest of the functionality unchanged.
+## Tasks
+- [x] Remove page transition animations (AnimatePresence, motion.div) that caused loading delays during navigation
+- [x] Implement lazy loading for all route components to improve initial load performance
+- [x] Add Suspense wrapper with minimal loading fallback to prevent navigation loading states

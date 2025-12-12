@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, useLocation, useParams, useNavigate } from "react-router-dom";
 // Referral redirect component
 const ReferralRedirect = () => {
@@ -9,27 +9,21 @@ const ReferralRedirect = () => {
   }, [referral_code, navigate]);
   return null;
 };
-import { AnimatePresence, motion } from "framer-motion";
-import LoadingScreen from "../components/LoadingScreen";
 
-// Pages
-import LandingPage from "../pages/LandingPage";
-import About from "../pages/About";
-import Home from "../pages/Home";
-import NotFound from "../pages/NotFound";
-
-// Auth
-import Login from "../features/auth/Login";
-import Register from "../features/auth/Register";
-import KYCForm from "../features/auth/KYCForm";
-import ForgotPassword from "../features/auth/ForgotPassword";
-import ResetPassword from "../features/auth/ResetPassword";
-
-// Dashboards
-import ClientDashboard from "../features/dashboard/ClientDashboard";
-import AdminDashboard from "../features/dashboard/AdminDashboard";
-import WithdrawalForm from "../features/transactions/Withdraw";
-import ReferralPage from "../features/referral/ReferralPage"; // ✅ Correct import
+// Lazy load components for better performance
+const LandingPage = lazy(() => import("../pages/LandingPage"));
+const About = lazy(() => import("../pages/About"));
+const Home = lazy(() => import("../pages/Home"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const Login = lazy(() => import("../features/auth/Login"));
+const Register = lazy(() => import("../features/auth/Register"));
+const KYCForm = lazy(() => import("../features/auth/KYCForm"));
+const ForgotPassword = lazy(() => import("../features/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("../features/auth/ResetPassword"));
+const ClientDashboard = lazy(() => import("../features/dashboard/ClientDashboard"));
+const AdminDashboard = lazy(() => import("../features/dashboard/AdminDashboard"));
+const WithdrawalForm = lazy(() => import("../features/transactions/Withdraw"));
+const ReferralPage = lazy(() => import("../features/referral/ReferralPage"));
 import RequireAuth from "./RequireAuth";
 
 // Error Boundary
@@ -61,93 +55,62 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Slide animation variants
-const slideVariants = {
-  initial: { opacity: 0, x: 80 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -80 },
-};
 
-const PageWrapper = ({ children }) => (
-  <motion.div
-    variants={slideVariants}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-    style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-  >
-    {children}
-  </motion.div>
-);
 
 const AppRoutes = () => {
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 500); // Simulate loading time for navigation
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
-
-  if (isLoading) {
-    return <LoadingScreen message="Navigating..." subMessage="Please wait while we load the page" />;
-  }
-
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* Public Pages */}
-        <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
-        <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
-        <Route path="/home" element={<PageWrapper><Home /></PageWrapper>} />
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+      {/* Public Pages */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/home" element={<Home />} />
 
-        {/* Authentication */}
-        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
-        <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
-        <Route path="/kyc" element={<PageWrapper><KYCForm /></PageWrapper>} />
-        <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
-          <Route path="/reset-password/:uidb64/:token" element={<PageWrapper><ResetPassword /></PageWrapper>} />
-        {/* Referral link support: /referral/:referral_code redirects to /register?referral_code=... */}
-        <Route path="/referral/:referral_code" element={<ReferralRedirect />} />
+      {/* Authentication */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/kyc" element={<KYCForm />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
+      {/* Referral link support: /referral/:referral_code redirects to /register?referral_code=... */}
+      <Route path="/referral/:referral_code" element={<ReferralRedirect />} />
 
-        {/* Dashboards & Protected Routes */}
-        <Route
-          path="/client-dashboard"
-          element={
-            <RequireAuth>
-              <PageWrapper><ClientDashboard /></PageWrapper>
-            </RequireAuth>
-          }
-        />
-        <Route path="/withdraw" element={<PageWrapper><WithdrawalForm /></PageWrapper>} />
+      {/* Dashboards & Protected Routes */}
+      <Route
+        path="/client-dashboard"
+        element={
+          <RequireAuth>
+            <ClientDashboard />
+          </RequireAuth>
+        }
+      />
+      <Route path="/withdraw" element={<WithdrawalForm />} />
 
-        {/* ✅ Referral Page (Protected) */}
-        <Route
-          path="/referrals"
-          element={
-            <RequireAuth>
-              <PageWrapper><ReferralPage /></PageWrapper>
-            </RequireAuth>
-          }
-        />
+      {/* ✅ Referral Page (Protected) */}
+      <Route
+        path="/referrals"
+        element={
+          <RequireAuth>
+            <ReferralPage />
+          </RequireAuth>
+        }
+      />
 
-        <Route
-          path="/admin-dashboard"
-          element={
-            <RequireAuth>
-              <ErrorBoundary>
-                <PageWrapper><AdminDashboard /></PageWrapper>
-              </ErrorBoundary>
-            </RequireAuth>
-          }
-        />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <RequireAuth>
+            <ErrorBoundary>
+              <AdminDashboard />
+            </ErrorBoundary>
+          </RequireAuth>
+        }
+      />
 
-        {/* 404 Not Found */}
-        <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+      {/* 404 Not Found */}
+      <Route path="*" element={<NotFound />} />
       </Routes>
-    </AnimatePresence>
+    </Suspense>
   );
 };
 
