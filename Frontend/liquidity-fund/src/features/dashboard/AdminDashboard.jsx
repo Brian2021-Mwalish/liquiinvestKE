@@ -1371,7 +1371,10 @@ const AdminDashboard = () => {
             <button
               key={item.id}
               className={`w-full flex items-center px-4 py-3 rounded-lg text-white hover:bg-green-700 transition-colors font-medium ${activeSection === item.id ? 'bg-green-800' : ''}`}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => {
+                setActiveSection(item.id);
+                setSidebarOpen(false);
+              }}
             >
               <item.icon size={20} className="mr-3" />
               {item.label}

@@ -45,7 +45,7 @@ const RequireAuth = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <p className="text-center mt-10">Checking authentication...</p>;
+    return null;
   }
 
   if (!isAuth) {

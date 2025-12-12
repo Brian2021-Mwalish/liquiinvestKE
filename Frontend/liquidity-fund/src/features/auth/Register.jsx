@@ -157,7 +157,7 @@ const Register = () => {
   return (
     <div className="h-screen w-full flex p-2 sm:p-4 md:p-6 overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #e6f4ea 0%, #b7e4c7 50%, #1b4332 100%)",
+        background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #15803d 100%)",
       }}
     >
       {/* Uniquely styled, bold, and highly visible Back Arrow */}
@@ -165,10 +165,10 @@ const Register = () => {
         to="/"
         className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-full shadow-2xl z-50 font-bold text-sm sm:text-base"
         style={{
-          background: "linear-gradient(90deg, #1b4332 70%, #b7e4c7 100%)",
+          background: "linear-gradient(90deg, #15803d 70%, #dcfce7 100%)",
           color: "#fff",
-          border: "2px solid #14532d",
-          boxShadow: "0 4px 24px 0 #14532d55",
+          border: "2px solid #15803d",
+          boxShadow: "0 4px 24px 0 #15803d55",
           letterSpacing: "0.03em"
         }}
       >
@@ -182,7 +182,7 @@ const Register = () => {
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6">
           <div className="text-center animate-fade-in max-w-md">
             <div className="mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                 <User className="text-white w-8 h-8" />
               </div>
               <h1 className="text-3xl font-bold text-green-900 mb-3 animate-slide-up">
@@ -251,7 +251,7 @@ const Register = () => {
 
         {/* Header */}
         <div className="text-center transform transition-all duration-300 hover:scale-105">
-          <h1 className="text-xl md:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent animate-pulse">
+          <h1 className="text-xl md:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent animate-pulse">
             Join Liquidity Investments
           </h1>
           <p className="mt-2 sm:mt-3 text-xs md:text-sm sm:text-base text-green-700 transition-colors duration-300 hover:text-green-900 max-w-md mx-auto">
@@ -264,7 +264,7 @@ const Register = () => {
 
           {/* Welcome Message */}
           <div className="text-center mb-3">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mb-2">
+            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-full mb-2">
               <User className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-base font-semibold text-green-900 mb-1">Create Your Account</h2>
@@ -433,7 +433,7 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading || isSubmitting || !isValid}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:from-green-700 hover:to-green-600 hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50"
               >
                 <div className="flex items-center justify-center gap-1">
                   {loading ? (
@@ -474,14 +474,14 @@ const Register = () => {
         <div className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
           <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-lg mx-4 transform transition-all duration-500 scale-100 hover:scale-105 border-4 border-gray-300">
             <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="w-24 h-24 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-extrabold text-gray-900 mb-4">{successMessage}</h2>
               <p className="text-gray-800 mb-8 text-lg font-medium">Please Login to continue your investment journey.</p>
               <button
                 onClick={() => navigate("/login")}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-110 shadow-xl hover:shadow-2xl"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-green-700 hover:to-green-600 transition-all duration-300 transform hover:scale-110 shadow-xl hover:shadow-2xl"
               >
                 Go to Login
               </button>

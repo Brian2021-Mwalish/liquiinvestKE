@@ -24,7 +24,7 @@ import { Shield } from "lucide-react";
 import { Activity } from "lucide-react";
 
 const ClientDashboard = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('rentals');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
@@ -342,10 +342,9 @@ const ClientDashboard = () => {
   );
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'rentals', label: 'My Rentals', icon: FileText },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'rent', label: 'Rent Currency', icon: Coins },
-    { id: 'rentals', label: 'My Rentals', icon: FileText },
     { id: 'referrals', label: 'Referrals', link: '/referrals', icon: Users },
     { id: 'history', label: 'Payment History', link: '/home', icon: History },
     { id: 'account', label: 'Account Settings', link: '/kyc', icon: Settings },
@@ -391,38 +390,7 @@ const ClientDashboard = () => {
           </div>
         );
 
-      case 'dashboard':
-        return (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-green-600/90 text-white p-8 rounded-2xl shadow-2xl">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome back{clientName ? `, ${clientName}` : ''}!</h1>
-              <div className="flex items-baseline gap-2">
-                <span className="text-lg opacity-90">Current Balance:</span>
-                <span className="text-4xl font-bold">KES {balance.toLocaleString()}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard 
-                title="Active Rentals" 
-                value={activeRentals.length} 
-                subtitle="Currently earning" 
-                icon={Coins}
-              />
-              <StatCard 
-                title="Total Earnings" 
-                value={`KES ${totalEarnings.toLocaleString()}`} 
-                subtitle="This month" 
-                icon={TrendingUp}
-              />
-              <StatCard 
-                title="Pending Returns" 
-                value={`KES ${pendingReturns.toLocaleString()}`} 
-                subtitle="Expected returns" 
-                icon={Clock}
-              />
-            </div>
-          </div>
-        );
+
 
       case 'rent':
         return (

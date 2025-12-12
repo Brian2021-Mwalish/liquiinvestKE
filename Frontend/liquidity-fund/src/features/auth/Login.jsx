@@ -117,11 +117,11 @@ const Login = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-green-900 via-green-100 to-green-300 p-2 md:p-4">
+    <div className="fixed inset-0 bg-gradient-to-br from-green-600 via-green-50 to-green-300 p-2 md:p-4">
       {/* Back Arrow at top left, outside the container */}
       <Link
         to="/"
-        className="fixed top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 bg-green-900 text-green-50 px-3 py-2 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-green-800 transition z-50"
+        className="fixed top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 bg-green-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-green-600 transition z-50"
         style={{ textDecoration: "none" }}
       >
         <ArrowLeft size={20} className="md:w-6 md:h-6" />
@@ -198,7 +198,7 @@ const Login = () => {
 
         {/* Right Side: Login Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center">
-          <div className="w-full max-w-md bg-green-50/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 md:p-6 space-y-4 md:space-y-6 border-2 border-green-900 relative animate-fade-in">
+          <div className="w-full max-w-md bg-green-50 backdrop-blur-sm rounded-2xl shadow-lg p-4 md:p-6 space-y-4 md:space-y-6 border-2 border-green-600 relative animate-fade-in">
         {/* Header */}
         <div className="text-center mt-6 md:mt-8">
           <div className="flex justify-center items-center gap-2">
@@ -234,7 +234,7 @@ const Login = () => {
               type="email"
               {...register("email")}
               placeholder="Enter email"
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-700 text-sm ${
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-600 text-sm ${
                 errors.email ? "border-red-400 bg-red-50" : "border-green-300 bg-green-50"
               }`}
             />
@@ -251,9 +251,9 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
                 placeholder="Enter password"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-700 text-sm ${
-                  errors.password ? "border-red-400 bg-red-50" : "border-green-300 bg-green-50"
-                }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-600 text-sm ${
+                errors.password ? "border-red-400 bg-red-50" : "border-green-300 bg-green-50"
+              }`}
               />
               <button
                 type="button"
@@ -275,7 +275,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={isSubmitting || !isOnline}
-            className="w-full bg-gradient-to-r from-green-900 to-green-700 text-white py-2 rounded-lg font-semibold text-sm hover:from-green-800 hover:to-green-600 transition disabled:opacity-50 flex justify-center items-center gap-2"
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg font-semibold text-sm hover:from-green-700 hover:to-green-600 transition disabled:opacity-50 flex justify-center items-center gap-2"
           >
             {!isOnline ? <WifiOff size={16} /> : <User size={16} />}
             {isSubmitting ? "Signing in..." : !isOnline ? "Offline" : "Sign In"}
