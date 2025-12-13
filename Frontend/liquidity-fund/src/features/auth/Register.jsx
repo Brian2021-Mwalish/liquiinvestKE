@@ -3,9 +3,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, User, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, User, Mail, Lock, ArrowLeft, Sparkles, Shield, TrendingUp, Gift } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiFetch } from "../../lib/api";
 
 const schema = yup.object().shape({
   full_name: yup
@@ -40,7 +39,6 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   const {
     register,
@@ -57,7 +55,7 @@ const Register = () => {
   const watchedConfirmPassword = watch("confirmPassword");
 
   const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, label: "Enter password", color: "bg-gray-300" };
+    if (!password) return { strength: 0, label: "Enter password", color: "#d1d5db" };
     let strength = 0;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
@@ -65,11 +63,11 @@ const Register = () => {
     if (/\d/.test(password)) strength++;
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
     const levels = [
-      { label: "Very Weak", color: "bg-red-500" },
-      { label: "Weak", color: "bg-orange-500" },
-      { label: "Fair", color: "bg-yellow-500" },
-      { label: "Good", color: "bg-green-400" },
-      { label: "Strong", color: "bg-green-700" }
+      { label: "Very Weak", color: "#ef4444" },
+      { label: "Weak", color: "#f97316" },
+      { label: "Fair", color: "#eab308" },
+      { label: "Good", color: "#10b981" },
+      { label: "Strong", color: "#059669" }
     ];
     return { strength, ...levels[Math.min(strength, 4)] };
   };
@@ -135,9 +133,7 @@ const Register = () => {
         setLoading(false);
         return;
       } else {
-        // Success
         toast.dismiss("register");
-        setSuccessMessage("Registration Successful! Please Login");
         setShowSuccessModal(true);
         setLoading(false);
       }
@@ -155,333 +151,342 @@ const Register = () => {
   };
 
   return (
-    <div className="h-screen w-full flex p-2 sm:p-4 md:p-6 overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #15803d 100%)",
-      }}
-    >
-      {/* Uniquely styled, bold, and highly visible Back Arrow */}
+    <div className="h-screen w-full flex flex-col lg:flex-row relative overflow-hidden" style={{ backgroundColor: "#0F5D4E" }}>
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10" style={{ backgroundColor: "#dbeafe", filter: "blur(100px)" }}></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-10" style={{ backgroundColor: "#93c5fd", filter: "blur(100px)" }}></div>
+      </div>
+
+      {/* Back Button */}
       <Link
         to="/"
-        className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-full shadow-2xl z-50 font-bold text-sm sm:text-base"
+        className="fixed top-2 left-2 sm:top-4 sm:left-4 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-full z-50 font-bold text-xs sm:text-sm transition-all duration-300 hover:gap-2 sm:hover:gap-3"
         style={{
-          background: "linear-gradient(90deg, #15803d 70%, #dcfce7 100%)",
-          color: "#fff",
-          border: "2px solid #15803d",
-          boxShadow: "0 4px 24px 0 #15803d55",
-          letterSpacing: "0.03em"
+          backgroundColor: "#ffffff",
+          color: "#0F5D4E",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
         }}
       >
-        <ArrowLeft size={18} className="sm:w-6 sm:h-6" style={{ strokeWidth: 3 }} />
-        <span style={{ fontWeight: 700, textShadow: "0 2px 8px #14532d55" }}>Back to Home</span>
+        <ArrowLeft size={16} className="sm:w-5 sm:h-5" strokeWidth={2.5} />
+        <span>Back</span>
       </Link>
 
-      {/* Two-column layout */}
-      <div className="flex h-full w-full">
-        {/* Left Side: Descriptive Content */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6">
-          <div className="text-center animate-fade-in max-w-md">
-            <div className="mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <User className="text-white w-8 h-8" />
-              </div>
-              <h1 className="text-3xl font-bold text-green-900 mb-3 animate-slide-up">
-                Join LiquiInvest KE
-              </h1>
-              <p className="text-lg text-green-700 mb-4 animate-slide-up-delayed">
-                Start Your Investment Journey
-              </p>
+      {/* Left Side: Benefits Section */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6 xl:p-8 relative z-10">
+        <div className="max-w-lg space-y-6">
+          {/* Hero Section */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-2" style={{ backgroundColor: "#ffffff" }}>
+              <Sparkles className="w-8 h-8" style={{ color: "#0F5D4E" }} />
             </div>
+            <h1 className="text-4xl font-black text-white leading-tight">
+              Start Growing<br />Your Wealth Today
+            </h1>
+            <p className="text-lg font-medium" style={{ color: "#bfdbfe" }}>
+              Join thousands of smart investors across Kenya
+            </p>
+          </div>
 
-            <div className="space-y-4 text-left max-w-sm mx-auto">
-              <div className="flex items-start space-x-3 animate-slide-in-left">
-                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="text-white w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-green-900 mb-1 text-sm">100% Returns Guaranteed</h3>
-                  <p className="text-green-700 text-xs">Double your investment in just 20 days.</p>
-                </div>
+          {/* Benefits Grid */}
+          <div className="grid gap-3 mt-8">
+            <div className="flex items-start gap-3 p-4 rounded-2xl transition-all duration-300 hover:translate-x-2" style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}>
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#ffffff" }}>
+                <TrendingUp className="w-6 h-6" style={{ color: "#0F5D4E" }} />
               </div>
-
-              <div className="flex items-start space-x-3 animate-slide-in-left-delayed">
-                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="text-white w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-green-900 mb-1 text-sm">M-Pesa Integration</h3>
-                  <p className="text-green-700 text-xs">Easy deposits and withdrawals.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 animate-slide-in-left-delayed-2">
-                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Lock className="text-white w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-green-900 mb-1 text-sm">Bank-Level Security</h3>
-                  <p className="text-green-700 text-xs">Your investments are fully protected.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 animate-slide-in-left-delayed-3">
-                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <User className="text-white w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-green-900 mb-1 text-sm">Referral Bonuses</h3>
-                  <p className="text-green-700 text-xs">Earn by inviting friends.</p>
-                </div>
+              <div>
+                <h3 className="font-bold text-white text-base mb-0.5">100% Returns</h3>
+                <p className="text-sm" style={{ color: "#bfdbfe" }}>Double your money in just 20 days</p>
               </div>
             </div>
 
-            <div className="mt-6 text-center">
-              <div className="inline-flex items-center space-x-2 bg-green-100 px-3 py-1 rounded-full animate-pulse">
-                <span className="text-green-800 font-semibold text-sm">Join 10,000+ Investors</span>
-                <span className="text-lg">🇰🇪</span>
+            <div className="flex items-start gap-3 p-4 rounded-2xl transition-all duration-300 hover:translate-x-2" style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}>
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#ffffff" }}>
+                <Shield className="w-6 h-6" style={{ color: "#0F5D4E" }} />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-base mb-0.5">Bank-Level Security</h3>
+                <p className="text-sm" style={{ color: "#bfdbfe" }}>Protected with military-grade encryption</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-2xl transition-all duration-300 hover:translate-x-2" style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}>
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#ffffff" }}>
+                <Gift className="w-6 h-6" style={{ color: "#0F5D4E" }} />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-base mb-0.5">Referral Rewards</h3>
+                <p className="text-sm" style={{ color: "#bfdbfe" }}>Earn bonuses by inviting friends</p>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Side: Register Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center">
-          <div className="w-full max-w-md animate-fade-in p-2">
-
-
-        {/* Header */}
-        <div className="text-center transform transition-all duration-300 hover:scale-105">
-          <h1 className="text-xl md:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent animate-pulse">
-            Join Liquidity Investments
-          </h1>
-          <p className="mt-2 sm:mt-3 text-xs md:text-sm sm:text-base text-green-700 transition-colors duration-300 hover:text-green-900 max-w-md mx-auto">
-            Create your account and start your investment journey with us today
-          </p>
-        </div>
-
-        {/* Main Form Container */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-green-200 p-3 transform transition-all duration-300 hover:shadow-2xl mx-auto max-w-md">
-
-          {/* Welcome Message */}
-          <div className="text-center mb-3">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-full mb-2">
-              <User className="w-5 h-5 text-white" />
+          {/* Trust Badge */}
+          <div className="flex items-center justify-center gap-2 p-3 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#3b82f6", borderColor: "#0F5D4E" }}>
+                  {i === 4 ? "+" : ""}
+                </div>
+              ))}
             </div>
-            <h2 className="text-base font-semibold text-green-900 mb-1">Create Your Account</h2>
-            <p className="text-xs text-green-700">Please fill in your details</p>
+            <span className="text-white font-bold text-base">10,000+ Investors</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side: Registration Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-4 lg:p-6 relative z-10">
+        <div className="w-full max-w-md">
+          {/* Mobile Hero */}
+          <div className="lg:hidden text-center mb-3 sm:mb-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full mb-2" style={{ backgroundColor: "#ffffff" }}>
+              <Sparkles className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "#0F5D4E" }} />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">Join LiquiInvest</h1>
+            <p className="text-sm font-medium" style={{ color: "#bfdbfe" }}>Start your investment journey</p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-            {/* Full Name Field */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 mb-2 font-semibold text-green-700 text-sm sm:text-base">
-                <User className="w-4 h-4 text-green-600" />
-                Full Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  {...register("full_name")}
-                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-opacity-30 text-sm sm:text-base transition-all duration-300 ${
-                    errors.full_name
-                      ? "border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50 shake"
-                      : "border-green-300 focus:ring-green-200 focus:border-green-500 bg-green-50 hover:bg-white hover:border-green-400"
-                  }`}
-                  placeholder="Enter your full name"
-                />
-                {!errors.full_name && watch("full_name") && (
-                  <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" />
-                )}
+          {/* Form Card */}
+          <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl" style={{ backgroundColor: "#ffffff" }}>
+            {/* Form Header */}
+            <div className="text-center mb-3 sm:mb-4">
+              <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mb-2" style={{ backgroundColor: "#0F5D4E" }}>
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              {errors.full_name && (
-                <p className="text-xs sm:text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  {errors.full_name.message}
-                </p>
-              )}
+              <h2 className="text-lg sm:text-xl font-bold mb-0.5" style={{ color: "#0F5D4E" }}>Create Account</h2>
+              <p className="text-gray-600 text-xs sm:text-sm">Fill in your details to get started</p>
             </div>
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 mb-2 font-semibold text-green-700 text-sm sm:text-base">
-                <Mail className="w-4 h-4 text-green-600" />
-                Email Address
-              </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  {...register("email")}
-                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-opacity-30 text-sm sm:text-base transition-all duration-300 ${
-                    errors.email
-                      ? "border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50 shake"
-                      : "border-green-300 focus:ring-green-200 focus:border-green-500 bg-green-50 hover:bg-white hover:border-green-400"
-                  }`}
-                  placeholder="Enter your email address"
-                />
-                {!errors.email && watch("email") && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watch("email")) && (
-                  <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" />
-                )}
-              </div>
-              {errors.email && (
-                <p className="text-xs sm:text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Password Fields Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {/* Password Field */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 mb-2 font-semibold text-green-700 text-sm sm:text-base">
-                  <Lock className="w-4 h-4 text-green-600" />
-                  Password
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-3">
+              {/* Full Name */}
+              <div>
+                <label className="flex items-center gap-1.5 mb-1.5 font-semibold text-xs sm:text-sm" style={{ color: "#0F5D4E" }}>
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Full Name
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"}
-                    {...register("password")}
-                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 border-2 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-opacity-30 text-sm sm:text-base transition-all duration-300 ${
-                      errors.password
-                        ? "border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50 shake"
-                        : "border-green-300 focus:ring-green-200 focus:border-green-500 bg-green-50 hover:bg-white hover:border-green-400"
-                    }`}
-                    placeholder="Create a strong password"
+                    type="text"
+                    {...register("full_name")}
+                    className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 border-2 rounded-lg sm:rounded-xl focus:outline-none text-sm transition-all duration-200"
+                    style={{
+                      borderColor: errors.full_name ? "#ef4444" : "#d1d5db",
+                      backgroundColor: errors.full_name ? "#fee2e2" : "#f9fafb"
+                    }}
+                    placeholder="Enter your full name"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-3 flex items-center text-green-500 hover:text-green-700 transition-colors duration-200"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                
-                {/* Password Strength Indicator */}
-                {watchedPassword && (
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-green-700">Password Strength:</span>
-                      <span className={`font-medium ${
-                        passwordStrength.strength <= 1 ? 'text-red-500' :
-                        passwordStrength.strength <= 2 ? 'text-orange-500' :
-                        passwordStrength.strength <= 3 ? 'text-yellow-600' :
-                        passwordStrength.strength <= 4 ? 'text-green-400' :
-                        'text-green-600'
-                      }`}>
-                        {passwordStrength.label}
-                      </span>
-                    </div>
-                    <div className="w-full bg-green-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                        style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-                
-                {errors.password && (
-                  <p className="text-xs sm:text-sm text-red-600 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Confirm Password Field */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 mb-2 font-semibold text-green-700 text-sm sm:text-base">
-                  <Lock className="w-4 h-4 text-green-600" />
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    {...register("confirmPassword")}
-                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 border-2 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-opacity-30 text-sm sm:text-base transition-all duration-300 ${
-                      errors.confirmPassword
-                        ? "border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50 shake"
-                        : "border-green-300 focus:ring-green-200 focus:border-green-500 bg-green-50 hover:bg-white hover:border-green-400"
-                    }`}
-                    placeholder="Confirm your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-3 flex items-center text-green-500 hover:text-green-700 transition-colors duration-200"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                  {!errors.confirmPassword && watchedConfirmPassword && watchedPassword === watchedConfirmPassword && (
-                    <CheckCircle className="absolute right-12 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" />
+                  {!errors.full_name && watch("full_name") && (
+                    <CheckCircle className="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: "#0F5D4E" }} />
                   )}
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-xs sm:text-sm text-red-600 mt-1 flex items-center gap-1">
+                {errors.full_name && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
-                    {errors.confirmPassword.message}
+                    {errors.full_name.message}
                   </p>
                 )}
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <div className="pt-2">
+              {/* Email */}
+              <div>
+                <label className="flex items-center gap-1.5 mb-1.5 font-semibold text-xs sm:text-sm" style={{ color: "#0F5D4E" }}>
+                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    {...register("email")}
+                    className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 border-2 rounded-lg sm:rounded-xl focus:outline-none text-sm transition-all duration-200"
+                    style={{
+                      borderColor: errors.email ? "#ef4444" : "#d1d5db",
+                      backgroundColor: errors.email ? "#fee2e2" : "#f9fafb"
+                    }}
+                    placeholder="Enter your email"
+                  />
+                  {!errors.email && watch("email") && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watch("email")) && (
+                    <CheckCircle className="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: "#0F5D4E" }} />
+                  )}
+                </div>
+                {errors.email && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password Fields in Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                {/* Password */}
+                <div>
+                  <label className="flex items-center gap-1.5 mb-1.5 font-semibold text-xs sm:text-sm" style={{ color: "#0F5D4E" }}>
+                    <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      {...register("password")}
+                      className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 pr-9 border-2 rounded-lg sm:rounded-xl focus:outline-none text-sm transition-all duration-200"
+                      style={{
+                        borderColor: errors.password ? "#ef4444" : "#d1d5db",
+                        backgroundColor: errors.password ? "#fee2e2" : "#f9fafb"
+                      }}
+                      placeholder="Password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#0F5D4E" }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Too weak
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label className="flex items-center gap-1.5 mb-1.5 font-semibold text-xs sm:text-sm" style={{ color: "#0F5D4E" }}>
+                    <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Confirm
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      {...register("confirmPassword")}
+                      className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 pr-9 border-2 rounded-lg sm:rounded-xl focus:outline-none text-sm transition-all duration-200"
+                      style={{
+                        borderColor: errors.confirmPassword ? "#ef4444" : "#d1d5db",
+                        backgroundColor: errors.confirmPassword ? "#fee2e2" : "#f9fafb"
+                      }}
+                      placeholder="Confirm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-2.5 top-1/2 transform -translate-y-1/2"
+                      style={{ color: "#0F5D4E" }}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    {!errors.confirmPassword && watchedConfirmPassword && watchedPassword === watchedConfirmPassword && (
+                      <CheckCircle className="absolute right-9 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: "#0F5D4E" }} />
+                    )}
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      No match
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Password Strength - Compact */}
+              {watchedPassword && (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: "#e5e7eb" }}>
+                    <div 
+                      className="h-1.5 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${(passwordStrength.strength / 5) * 100}%`,
+                        backgroundColor: passwordStrength.color
+                      }}
+                    ></div>
+                  </div>
+                  <span className="text-xs font-semibold whitespace-nowrap" style={{ color: passwordStrength.color }}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+              )}
+
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading || isSubmitting || !isValid}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:from-green-700 hover:to-green-600 hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50"
+                className="w-full py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl mt-1"
+                style={{
+                  backgroundColor: "#0F5D4E",
+                  color: "#ffffff"
+                }}
               >
-                <div className="flex items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-2">
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin" size={16} />
+                      <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
                       Creating...
                     </>
                   ) : (
                     <>
-                      <User className="w-4 h-4" />
+                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
                       Create Account
                     </>
                   )}
                 </div>
               </button>
-            </div>
-          </form>
-        </div>
+            </form>
 
-        {/* Sign In Link */}
-        <div className="text-center mt-2">
-          <p className="text-xs text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline"
-            >
-              Sign in here
-            </Link>
-          </p>
-        </div>
+            {/* Sign In Link */}
+            <div className="text-center mt-3 sm:mt-4">
+              <p className="text-xs sm:text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-bold transition-colors"
+                  style={{ color: "#0F5D4E" }}
+                >
+                  Sign In
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-lg mx-4 transform transition-all duration-500 scale-100 hover:scale-105 border-4 border-gray-300">
-            <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <CheckCircle className="w-12 h-12 text-white" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0,0,0,0.75)" }}>
+          <div className="w-full max-w-md rounded-3xl p-8 shadow-2xl transform transition-all duration-500 scale-100" style={{ backgroundColor: "#ffffff" }}>
+            <div className="text-center space-y-6">
+              {/* Success Icon with Animation */}
+              <div className="relative inline-flex">
+                <div className="w-24 h-24 rounded-full flex items-center justify-center animate-bounce" style={{ backgroundColor: "#0F5D4E" }}>
+                  <CheckCircle className="w-12 h-12 text-white" strokeWidth={2.5} />
+                </div>
+                <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ backgroundColor: "#0F5D4E" }}></div>
               </div>
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-4">{successMessage}</h2>
-              <p className="text-gray-800 mb-8 text-lg font-medium">Please Login to continue your investment journey.</p>
+
+              {/* Success Message */}
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black" style={{ color: "#0F5D4E" }}>
+                  Registration Successful!
+                </h2>
+                <p className="text-gray-600 text-lg font-medium">
+                  Welcome to LiquiInvest KE
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Your account has been created successfully. Please login to continue.
+                </p>
+              </div>
+
+              {/* Action Button */}
               <button
                 onClick={() => navigate("/login")}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-green-700 hover:to-green-600 transition-all duration-300 transform hover:scale-110 shadow-xl hover:shadow-2xl"
+                className="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: "#0F5D4E",
+                  color: "#ffffff"
+                }}
               >
                 Go to Login
               </button>
@@ -490,59 +495,32 @@ const Register = () => {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-
-        .shake {
-          animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slide-up {
-          from { transform: translateY(30px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes slide-in-left {
-          from { transform: translateX(-30px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 1s ease-out;
-        }
-        .animate-slide-up {
-          animation: slide-up 1s ease-out;
-        }
-        .animate-slide-up-delayed {
-          animation: slide-up 1s ease-out 0.2s both;
-        }
-        .animate-slide-in-left {
-          animation: slide-in-left 0.8s ease-out;
-        }
-        .animate-slide-in-left-delayed {
-          animation: slide-in-left 0.8s ease-out 0.2s both;
-        }
-        .animate-slide-in-left-delayed-2 {
-          animation: slide-in-left 0.8s ease-out 0.4s both;
-        }
-        .animate-slide-in-left-delayed-3 {
-          animation: slide-in-left 0.8s ease-out 0.6s both;
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 1rem;
+      <style>{`
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
           }
         }
-      `}
-      </style>
+        @keyframes ping {
+          0% {
+            transform: scale(1);
+            opacity: 0.2;
+          }
+          100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+        .animate-bounce {
+          animation: bounce 1s ease-in-out infinite;
+        }
+        .animate-ping {
+          animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+      `}</style>
     </div>
   );
 };

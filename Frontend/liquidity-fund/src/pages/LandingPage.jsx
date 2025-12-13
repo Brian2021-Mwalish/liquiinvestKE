@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Shield, TrendingUp, Users, Zap, Clock, Award, CheckCircle, Menu, X, Phone, Mail, MapPin, Lock, Smartphone, BarChart3 } from 'lucide-react';
+import { ArrowRight, Shield, TrendingUp, Users, Zap, Award, CheckCircle, Menu, X, Phone, Mail, MapPin, Lock, Smartphone, BarChart3, Star, Sparkles, Gift, Timer, CircleDollarSign, Coins, ArrowUpRight, Percent, Clock, Target } from 'lucide-react';
 
 const LandingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -8,117 +8,96 @@ const LandingPage = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   const [hasSpun, setHasSpun] = useState(false);
+  const [liveCounter, setLiveCounter] = useState(2847563);
+  const [pulseIndex, setPulseIndex] = useState(0);
+  const [floatingNum, setFloatingNum] = useState(0);
   const navigate = useNavigate();
 
+  const colors = {
+    primary: '#0F5D4E',
+    primaryLight: '#1A7D6A',
+    primaryDark: '#0A4539',
+    accent: '#E5A500',
+    accentLight: '#FFB81C',
+    background: '#FFFFFF',
+    foreground: '#0F3D35',
+    muted: '#F0F5F4',
+    mutedForeground: '#5A6F6A',
+    border: '#D4E0DE',
+    dark: '#0F3D35',
+    white: '#FFFFFF',
+  };
+
+  // Animated counter
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveCounter(prev => prev + Math.floor(Math.random() * 500) + 100);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Pulse animation index
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPulseIndex(prev => (prev + 1) % 6);
+    }, 800);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Floating numbers
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFloatingNum(prev => (prev + 1) % 5);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, []);
+
   const benefits = [
-    { 
-      icon: TrendingUp, 
-      title: 'Guaranteed 100% Returns', 
-      desc: 'Watch your money double in just 20 days with guaranteed returns on every investment. No hidden fees, no surprises.' 
-    },
-    { 
-      icon: Shield, 
-      title: 'Fully Licensed & Regulated', 
-      desc: 'Licensed by Central Bank of Kenya (CBK) and regulated by Capital Markets Authority (CMA) for your complete peace of mind.' 
-    },
-    { 
-      icon: Smartphone, 
-      title: 'M-Pesa Integration', 
-      desc: 'Deposit and withdraw instantly using M-Pesa. No bank visits, no paperwork - just quick and easy mobile money transactions.' 
-    },
-    { 
-      icon: Lock, 
-      title: 'Bank-Level Security', 
-      desc: '256-bit SSL encryption protects all your data and transactions. Your information is safe with us, always.' 
-    },
-    { 
-      icon: Users, 
-      title: 'Earn by Referring', 
-      desc: 'Share with friends and earn 50% commission on their investments. Build passive income while helping others grow their wealth.' 
-    },
-    { 
-      icon: BarChart3, 
-      title: 'Real-Time Tracking', 
-      desc: 'Monitor your investments 24/7 from anywhere. See your money grow with live updates on your dashboard.' 
-    },
+    { icon: TrendingUp, title: 'Guaranteed 100% Returns', desc: 'Watch your money investments in just 20 days with guaranteed returns on every investment.' },
+    { icon: Shield, title: 'Fully Licensed & Regulated', desc: 'Licensed by County Governments and regulated by Capital Markets Authority (CMA).' },
+    { icon: Smartphone, title: 'M-Pesa Integration', desc: 'Deposit and withdraw instantly using M-Pesa. No bank visits, no paperwork.' },
+    { icon: Lock, title: 'Bank-Level Security', desc: '256-bit SSL encryption protects all your data and transactions.' },
+    { icon: Users, title: 'Earn by Referring', desc: 'Share with friends and earn 50% commission on their investments.' },
+    { icon: BarChart3, title: 'Real-Time Tracking', desc: 'Monitor your investments 24/7 from anywhere with live updates.' },
   ];
 
   const investmentOptions = [
-    { currency: 'Canadian Dollar (CAD)', amount: 100, flag: '🇨🇦', returns: 200 },
-    { currency: 'Australian Dollar (AUD)', amount: 250, flag: '🇦🇺', returns: 500 },
-    { currency: 'British Pound (GBP)', amount: 500, flag: '🇬🇧', returns: 1000 },
-    { currency: 'Japanese Yen (JPY)', amount: 750, flag: '🇯🇵', returns: 1500 },
-    { currency: 'Euro (EUR)', amount: 1000, flag: '🇪🇺', returns: 2000 },
-    { currency: 'US Dollar (USD)', amount: 1200, flag: '🇺🇸', returns: 2400 },
+    { currency: 'Canadian Dollar', code: 'CAD', amount: 100, flag: '🇨🇦', returns: 200 },
+    { currency: 'Australian Dollar', code: 'AUD', amount: 250, flag: '🇦🇺', returns: 500 },
+    { currency: 'British Pound', code: 'GBP', amount: 500, flag: '🇬🇧', returns: 1000 },
+    { currency: 'Japanese Yen', code: 'JPY', amount: 750, flag: '🇯🇵', returns: 1500 },
+    { currency: 'Euro', code: 'EUR', amount: 1000, flag: '🇪🇺', returns: 2000 },
+    { currency: 'US Dollar', code: 'USD', amount: 1200, flag: '🇺🇸', returns: 2400 },
   ];
 
   const howItWorks = [
-    {
-      step: '1',
-      title: 'Sign Up in Minutes',
-      description: 'Create your free account with just your phone number and email. Complete a quick verification process and you\'re ready to invest.',
-      icon: Users
-    },
-    {
-      step: '2',
-      title: 'Choose Your Investment',
-      description: 'Pick from 6 global currencies starting at just KES 100. Pay instantly via M-Pesa and your investment begins immediately.',
-      icon: TrendingUp
-    },
-    {
-      step: '3',
-      title: 'Watch It Grow',
-      description: 'Track your investment in real-time. After 20 days, your money doubles automatically and gets credited to your wallet.',
-      icon: Award
-    },
-    {
-      step: '4',
-      title: 'Withdraw Anytime',
-      description: 'Cash out your returns instantly to your M-Pesa. No waiting periods, no hassles - your money, your timeline.',
-      icon: Zap
-    }
+    { step: '1', title: 'Sign Up in Minutes', description: 'Create your free account with just your phone number and email.', icon: Users },
+    { step: '2', title: 'Choose Your Investment', description: 'Pick from 6 global currencies starting at just KES 100.', icon: TrendingUp },
+    { step: '3', title: 'Watch It Grow', description: 'Track your investment in real-time. After 20 days, your money doubles.', icon: Award },
+    { step: '4', title: 'Withdraw Anytime', description: 'Cash out your returns instantly to your M-Pesa.', icon: Zap }
   ];
 
-
-
   const faqs = [
-    {
-      question: 'How does LiquiInvest KE work?',
-      answer: 'You invest in global currencies for 20 days and receive 100% returns (double your investment) at maturity. It\'s that simple!'
-    },
-    {
-      question: 'Is my money safe?',
-      answer: 'Absolutely! We are licensed by CBK and regulated by CMA. All transactions use 256-bit encryption and we never share your data.'
-    },
-    {
-      question: 'What is the minimum investment?',
-      answer: 'You can start investing with as little as KES 100. No large capital needed - start small and grow!'
-    },
-    {
-      question: 'How do I withdraw my money?',
-      answer: 'Withdrawals are processed instantly to your M-Pesa account. Simply request a withdrawal from your dashboard and receive funds within 24 hours.'
-    },
-    {
-      question: 'Can I invest multiple times?',
-      answer: 'Yes! You can make unlimited investments across different currencies. Diversify and maximize your returns.'
-    }
+    { question: 'How does LiquiInvest KE work?', answer: 'You invest in global currencies for 20 days and receive 100% returns at maturity.' },
+    { question: 'Is my money safe?', answer: 'Absolutely! We are licensed by CBK and regulated by CMA with 256-bit encryption.' },
+    { question: 'What is the minimum investment?', answer: 'You can start investing with as little as KES 100.' },
+    { question: 'How do I withdraw my money?', answer: 'Withdrawals are processed instantly to your M-Pesa within 24 hours.' },
+    { question: 'Can I invest multiple times?', answer: 'Yes! You can make unlimited investments across different currencies.' }
   ];
 
   const wheelPrizes = [
-    { name: '500 Points', color: 'bg-green-600', textColor: 'text-white' },
-    { name: '100 Points', color: 'bg-green-500', textColor: 'text-white' },
-    { name: '1000 Points', color: 'bg-green-700', textColor: 'text-white' },
-    { name: '250 Points', color: 'bg-green-500', textColor: 'text-white' },
-    { name: '750 Points', color: 'bg-green-600', textColor: 'text-white' },
-    { name: '200 Points', color: 'bg-green-500', textColor: 'text-white' },
+    { name: '500 Points', color: colors.primary },
+    { name: '100 Points', color: colors.primaryLight },
+    { name: '1000 Points', color: colors.primaryDark },
+    { name: '250 Points', color: colors.primaryLight },
+    { name: '750 Points', color: colors.primary },
+    { name: '200 Points', color: colors.primaryLight },
   ];
 
   const spinWheel = () => {
     if (isSpinning || hasSpun) return;
-    
     setIsSpinning(true);
     const randomIndex = Math.floor(Math.random() * wheelPrizes.length);
-    
     setTimeout(() => {
       setWinner(wheelPrizes[randomIndex]);
       setIsSpinning(false);
@@ -126,166 +105,265 @@ const LandingPage = () => {
     }, 3000);
   };
 
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">L</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">LiquiInvest KE</span>
-            </div>
-            
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#benefits" className="text-gray-700 hover:text-green-600 font-medium">Benefits</a>
-              <a href="#how-it-works" className="text-gray-700 hover:text-green-600 font-medium">How It Works</a>
-              <a href="#investments" className="text-gray-700 hover:text-green-600 font-medium">Investments</a>
-              <a href="#faq" className="text-gray-700 hover:text-green-600 font-medium">FAQ</a>
-              <button onClick={() => navigate('/login')} className="px-5 py-2 text-green-600 border-2 border-green-600 rounded-lg font-semibold hover:bg-green-50 transition">
-                Login
-              </button>
-              <button onClick={() => navigate('/register')} className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
-                Get Started
-              </button>
-            </div>
+  const graphicElements = [
+    { icon: CircleDollarSign, value: '+100%', delay: 0 },
+    { icon: TrendingUp, value: '20 Days', delay: 1 },
+    { icon: Coins, value: '2X', delay: 2 },
+    { icon: Target, value: 'Goal', delay: 3 },
+    { icon: ArrowUpRight, value: 'Grow', delay: 4 },
+    { icon: Percent, value: 'Profit', delay: 5 },
+  ];
 
-            <button 
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: colors.background, fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
+      <style>{`
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(1800deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px ${colors.accent}40; } 50% { box-shadow: 0 0 25px ${colors.accent}80; } }
+        @keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes ripple { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
+        @keyframes countUp { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes orbit { 0% { transform: rotate(0deg) translateX(80px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); } }
+        @keyframes morphBg { 0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } }
+        .orbit-1 { animation: orbit 8s linear infinite; }
+        .orbit-2 { animation: orbit 12s linear infinite reverse; }
+        .orbit-3 { animation: orbit 10s linear infinite; }
+        .morph-bg { animation: morphBg 8s ease-in-out infinite; }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        .glow-anim { animation: glow 2s ease-in-out infinite; }
+        .ripple-anim { animation: ripple 2s ease-out infinite; }
+        @media (min-width: 768px) {
+          .hero-content { grid-template-columns: 1fr 1fr !important; }
+          .hero-text { text-align: left !important; }
+          .hero-title { font-size: 40px !important; }
+          .hero-buttons { flex-direction: row !important; }
+          .hero-checks { justify-content: flex-start !important; }
+          .spin-content { grid-template-columns: 1fr 1fr !important; }
+          .wheel { width: 320px !important; height: 320px !important; }
+        }
+        @media (min-width: 1024px) {
+          .nav-links { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+          .hero-title { font-size: 48px !important; }
+        }
+        @media (max-width: 1023px) {
+          .nav-links { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+        }
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none; width: 28px; height: 28px; background: ${colors.primary}; border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px ${colors.primary}60;
+        }
+      `}</style>
+
+      {/* Navigation */}
+      <nav style={{ backgroundColor: colors.background, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'sticky', top: 0, zIndex: 50, borderBottom: `1px solid ${colors.border}` }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '64px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', backgroundColor: colors.primary, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontWeight: 'bold', fontSize: '20px' }}>L</div>
+            <span style={{ fontSize: '20px', fontWeight: 'bold', color: colors.foreground }}>LiquiInvest KE</span>
           </div>
+          
+          <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <a href="#benefits" style={{ color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none' }}>Benefits</a>
+            <a href="#how-it-works" style={{ color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none' }}>How It Works</a>
+            <a href="#investments" style={{ color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none' }}>Investments</a>
+            <a href="#faq" style={{ color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none' }}>FAQ</a>
+            <button onClick={() => navigate('/login')} style={{ padding: '8px 20px', color: colors.primary, border: `2px solid ${colors.primary}`, borderRadius: '8px', fontWeight: '600', backgroundColor: 'transparent', cursor: 'pointer' }}>Login</button>
+            <button onClick={() => navigate('/register')} style={{ padding: '8px 20px', backgroundColor: colors.primary, color: colors.white, borderRadius: '8px', fontWeight: '600', border: 'none', cursor: 'pointer' }}>Get Started</button>
+          </div>
+
+          <button className="mobile-menu-btn" style={{ display: 'none', padding: '8px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} color={colors.foreground} /> : <Menu size={24} color={colors.foreground} />}
+          </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-4 py-4 space-y-3">
-              <a href="#benefits" className="block text-gray-700 hover:text-green-600 font-medium py-2">Benefits</a>
-              <a href="#how-it-works" className="block text-gray-700 hover:text-green-600 font-medium py-2">How It Works</a>
-              <a href="#investments" className="block text-gray-700 hover:text-green-600 font-medium py-2">Investments</a>
-              <a href="#faq" className="block text-gray-700 hover:text-green-600 font-medium py-2">FAQ</a>
-              <button onClick={() => navigate('/login')} className="w-full px-4 py-2 text-green-600 border-2 border-green-600 rounded-lg font-semibold mb-2">
-                Login
-              </button>
-              <button onClick={() => navigate('/register')} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold">
-                Get Started
-              </button>
+          <div style={{ backgroundColor: colors.background, borderTop: `1px solid ${colors.border}`, padding: '16px' }}>
+            <a href="#benefits" style={{ display: 'block', color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none', padding: '12px 0' }}>Benefits</a>
+            <a href="#how-it-works" style={{ display: 'block', color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none', padding: '12px 0' }}>How It Works</a>
+            <a href="#investments" style={{ display: 'block', color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none', padding: '12px 0' }}>Investments</a>
+            <a href="#faq" style={{ display: 'block', color: colors.mutedForeground, fontWeight: '500', textDecoration: 'none', padding: '12px 0' }}>FAQ</a>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '12px' }}>
+              <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '12px', color: colors.primary, border: `2px solid ${colors.primary}`, borderRadius: '8px', fontWeight: '600', backgroundColor: 'transparent', cursor: 'pointer' }}>Login</button>
+              <button onClick={() => navigate('/register')} style={{ width: '100%', padding: '12px', backgroundColor: colors.primary, color: colors.white, borderRadius: '8px', fontWeight: '600', border: 'none', cursor: 'pointer' }}>Get Started</button>
             </div>
           </div>
         )}
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-green-600 text-white py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="bg-white rounded-2xl p-8 shadow-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Calculate Your Returns</h3>
-              <div className="space-y-6">
-                <div>
-                  <label className="text-gray-700 font-semibold mb-3 block">How much do you want to invest?</label>
-                  <input
-                    type="range"
-                    min="100"
-                    max="10000"
-                    step="100"
-                    value={investAmount}
-                    onChange={(e) => setInvestAmount(parseInt(e.target.value))}
-                    className="w-full h-3 bg-green-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="flex justify-between mt-2 text-sm text-gray-600">
-                    <span>KES 100</span>
-                    <span>KES 10,000</span>
+      <section style={{ backgroundColor: colors.primary, color: colors.white, padding: '48px 16px' }}>
+        <div className="hero-content" style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '32px', alignItems: 'center' }}>
+          
+          {/* Graphical Calculator Card */}
+          <div style={{ backgroundColor: colors.background, borderRadius: '24px', padding: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', position: 'relative', overflow: 'hidden' }}>
+            
+            {/* Animated Background Shape */}
+            <div className="morph-bg" style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', backgroundColor: `${colors.primary}10`, zIndex: 0 }}></div>
+            <div className="morph-bg" style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '150px', height: '150px', backgroundColor: `${colors.accent}15`, zIndex: 0, animationDelay: '2s' }}></div>
+
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {/* Header with animated icons */}
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <div className="float-anim" style={{ animationDelay: '0s' }}><Sparkles color={colors.accent} size={24} /></div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: colors.foreground, margin: 0, background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Calculate Your Returns</h3>
+                  <div className="float-anim" style={{ animationDelay: '0.5s' }}><Sparkles color={colors.accent} size={24} /></div>
+                </div>
+                <p style={{ fontSize: '13px', color: colors.mutedForeground, margin: 0 }}>See the magic of compound growth</p>
+              </div>
+
+              {/* Orbiting Elements Display */}
+              <div style={{ position: 'relative', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                {/* Center Circle with Counter */}
+                <div className="glow-anim" style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: colors.primary, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, border: `4px solid ${colors.accent}` }}>
+                  <div style={{ fontSize: '11px', color: colors.white, opacity: 0.8, marginBottom: '2px' }}>LIVE POOL</div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold', color: colors.accent, fontFamily: 'monospace', animation: 'countUp 2s infinite' }}>
+                    KES {liveCounter.toLocaleString()}
                   </div>
+                  <div style={{ fontSize: '10px', color: colors.white, opacity: 0.7, marginTop: '2px' }}>& growing...</div>
                 </div>
 
-                <div className="bg-green-50 p-6 rounded-xl border-2 border-green-600">
-                  <div className="text-sm text-gray-600 mb-2">You Invest</div>
-                  <div className="text-4xl font-bold text-green-600 mb-4">
-                    KES {investAmount.toLocaleString()}
-                  </div>
+                {/* Ripple Effect */}
+                <div className="ripple-anim" style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', border: `2px solid ${colors.primary}`, zIndex: 5 }}></div>
+                <div className="ripple-anim" style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', border: `2px solid ${colors.accent}`, zIndex: 5, animationDelay: '1s' }}></div>
 
-                  <div className="flex items-center justify-center py-3">
-                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                      <TrendingUp className="text-white" size={24} />
+                {/* Orbiting Icons */}
+                {graphicElements.map((el, idx) => (
+                  <div key={idx} className={`orbit-${(idx % 3) + 1}`} style={{ position: 'absolute', width: '44px', height: '44px', borderRadius: '12px', backgroundColor: pulseIndex === idx ? colors.accent : colors.white, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: pulseIndex === idx ? `0 0 20px ${colors.accent}` : '0 4px 15px rgba(0,0,0,0.15)', transition: 'all 0.3s', border: `2px solid ${pulseIndex === idx ? colors.accent : colors.primary}20`, animationDelay: `${idx * 0.5}s` }}>
+                    <el.icon size={16} color={pulseIndex === idx ? colors.white : colors.primary} />
+                    <span style={{ fontSize: '8px', fontWeight: 'bold', color: pulseIndex === idx ? colors.white : colors.primary, marginTop: '2px' }}>{el.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mysterious Stats Bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
+                {[
+                  { label: '???', subLabel: 'Secret Rate', icon: Percent },
+                  { label: '20', subLabel: 'Days Only', icon: Clock },
+                  { label: '2X', subLabel: 'Your Money', icon: Target },
+                ].map((stat, idx) => (
+                  <div key={idx} style={{ backgroundColor: `${colors.primary}08`, borderRadius: '12px', padding: '12px 8px', textAlign: 'center', border: `1px dashed ${colors.primary}30`, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '40px', height: '40px', backgroundColor: `${colors.accent}20`, borderRadius: '50%' }}></div>
+                    <stat.icon size={18} color={colors.primary} style={{ marginBottom: '4px' }} />
+                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: colors.primary }}>{stat.label}</div>
+                    <div style={{ fontSize: '10px', color: colors.mutedForeground }}>{stat.subLabel}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Interactive Slider */}
+              <div style={{ backgroundColor: `${colors.primary}05`, borderRadius: '16px', padding: '20px', border: `2px solid ${colors.primary}20`, marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: colors.foreground }}>Slide to discover...</span>
+                  <span style={{ fontSize: '12px', color: colors.accent, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Sparkles size={12} /> Interactive
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="100"
+                  max="10000"
+                  step="100"
+                  value={investAmount}
+                  onChange={(e) => setInvestAmount(parseInt(e.target.value))}
+                  style={{ width: '100%', height: '12px', borderRadius: '8px', backgroundColor: `${colors.primary}20`, appearance: 'none', cursor: 'pointer' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', color: colors.mutedForeground }}>
+                  <span>KES 100</span>
+                  <span style={{ color: colors.primary, fontWeight: 'bold' }}>KES {investAmount.toLocaleString()}</span>
+                  <span>KES 10,000</span>
+                </div>
+              </div>
+
+              {/* Results Display */}
+              <div style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, borderRadius: '16px', padding: '20px', marginBottom: '16px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: '0', right: '0', width: '100px', height: '100px', background: `radial-gradient(circle, ${colors.accent}30 0%, transparent 70%)` }}></div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '12px', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: colors.white, opacity: 0.8, marginBottom: '4px' }}>YOU PUT IN</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: colors.white }}>KES {investAmount.toLocaleString()}</div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="float-anim" style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: colors.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ArrowRight size={20} color={colors.foreground} />
                     </div>
+                    <span style={{ fontSize: '10px', color: colors.accent, fontWeight: 'bold', marginTop: '4px' }}>20 DAYS</span>
                   </div>
-
-                  <div className="text-sm text-gray-600 mb-2">You Get Back</div>
-                  <div className="text-4xl font-bold text-green-600 mb-2">
-                    KES {(investAmount * 2).toLocaleString()}
-                  </div>
-                  <div className="text-sm font-semibold text-gray-700">
-                    Profit: KES {investAmount.toLocaleString()} in 20 days
+                  
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: colors.white, opacity: 0.8, marginBottom: '4px' }}>YOU GET BACK</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: colors.accent }}>{(investAmount * 2).toLocaleString()}</div>
                   </div>
                 </div>
 
-                <button onClick={() => navigate('/register')} className="w-full py-4 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition">
-                  Get Started Now
-                </button>
+                <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: `1px solid ${colors.white}20`, textAlign: 'center' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: `${colors.white}20`, padding: '8px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', color: colors.white }}>
+                    <Gift size={16} color={colors.accent} />
+                    Pure Profit: KES {investAmount.toLocaleString()}
+                  </span>
+                </div>
               </div>
+
+              {/* Mystery Badges */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+                {[
+                  { icon: Shield, text: 'Protected' },
+                  { icon: Lock, text: 'Encrypted' },
+                  { icon: Star, text: 'Verified' },
+                ].map((badge, idx) => (
+                  <span key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.mutedForeground, backgroundColor: `${colors.muted}`, padding: '6px 12px', borderRadius: '20px', border: `1px solid ${colors.border}` }}>
+                    <badge.icon size={12} color={colors.primary} /> {badge.text}
+                  </span>
+                ))}
+              </div>
+
+              <button onClick={() => navigate('/register')} style={{ width: '100%', padding: '16px', backgroundColor: colors.primary, color: colors.white, borderRadius: '12px', fontWeight: 'bold', fontSize: '16px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: `0 4px 20px ${colors.primary}40` }}>
+                Unlock the Secret <ArrowRight size={20} />
+              </button>
             </div>
+          </div>
 
-            <div>
-              <div className="inline-block bg-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                🇰🇪 Trusted by People Who Value Growth
-              </div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-6 leading-tight">
-                Turn KES 100 Into KES 200 in Just 20 Days
-              </h1>
-              <p className="text-xl mb-8 text-green-50 leading-relaxed">
-                People trust our investment platform for safe, licensed opportunities that grow wealth reliably. Start your journey today with KES 100
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <button onClick={() => navigate('/register')} className="px-8 py-4 bg-white text-green-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition flex items-center justify-center">
-                  Start Investing Now <ArrowRight className="ml-2" size={20} />
-                </button>
-                <button className="px-8 py-4 bg-green-700 text-white rounded-lg font-bold text-lg hover:bg-green-800 transition">
-                  See How It Works
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle size={20} />
-                  <span className="text-green-50">CBK Licensed</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle size={20} />
-                  <span className="text-green-50">100% Secure</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle size={20} />
-                  <span className="text-green-50">Instant M-Pesa</span>
-                </div>
-              </div>
+          {/* Hero Text */}
+          <div className="hero-text" style={{ textAlign: 'center' }}>
+            <div style={{ display: 'inline-block', backgroundColor: colors.primaryDark, padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>🇰🇪 Trusted across Kenya</div>
+            <h1 className="hero-title" style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px', lineHeight: '1.2' }}>Turn KES 100 Into KES 200 in Just 20 Days</h1>
+            <p style={{ fontSize: '16px', marginBottom: '24px', opacity: 0.9, lineHeight: '1.6' }}>Join Kenya's most trusted investment platform. Safe, licensed, and ready to grow your wealth starting today.</p>
+            <div className="hero-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+              <button onClick={() => navigate('/register')} style={{ padding: '16px 32px', backgroundColor: colors.background, color: colors.primary, borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                Start Investing Now <ArrowRight size={20} />
+              </button>
+              <a href="#how-it-works" style={{ padding: '16px 32px', backgroundColor: colors.primaryDark, color: colors.white, borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', textDecoration: 'none', textAlign: 'center' }}>See How It Works</a>
+            </div>
+            <div className="hero-checks" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '14px' }}><CheckCircle size={18} /> CBK Licensed</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '14px' }}><CheckCircle size={18} /> 100% Secure</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '14px' }}><CheckCircle size={18} /> Instant M-Pesa</span>
             </div>
           </div>
         </div>
       </section>
 
-
-
       {/* Benefits Section */}
-      <section id="benefits" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Why Thousands Choose LiquiInvest KE</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the safest, simplest, and most rewarding way to grow your money in Kenya
-            </p>
+      <section id="benefits" style={{ padding: '48px 16px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>Why Thousands Choose LiquiInvest KE</h2>
+            <p style={{ fontSize: '16px', color: colors.mutedForeground, maxWidth: '768px', margin: '0 auto' }}>Experience the safest, simplest, and most rewarding way to grow your money</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             {benefits.map((benefit, index) => (
-              <div key={index} className="bg-gray-50 p-8 rounded-xl hover:shadow-xl transition-shadow border-2 border-transparent hover:border-green-600">
-                <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-5">
-                  <benefit.icon className="text-white" size={32} />
+              <div key={index} style={{ backgroundColor: `${colors.muted}50`, padding: '32px', borderRadius: '12px', border: '2px solid transparent' }}>
+                <div style={{ width: '56px', height: '56px', backgroundColor: colors.primary, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                  <benefit.icon color={colors.white} size={28} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{benefit.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{benefit.desc}</p>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>{benefit.title}</h3>
+                <p style={{ fontSize: '14px', color: colors.mutedForeground, lineHeight: '1.6' }}>{benefit.desc}</p>
               </div>
             ))}
           </div>
@@ -293,381 +371,199 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 bg-green-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">How LiquiInvest Works</h2>
-            <p className="text-xl text-gray-600">From signup to payout in 4 simple steps</p>
+      <section id="how-it-works" style={{ backgroundColor: `${colors.primary}08`, padding: '48px 16px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>How LiquiInvest Works</h2>
+            <p style={{ fontSize: '16px', color: colors.mutedForeground }}>From signup to payout in 4 simple steps</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
             {howItWorks.map((step, index) => (
-              <div key={index} className="bg-white p-8 rounded-xl shadow-md">
-                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-5 text-white text-2xl font-bold">
-                  {step.step}
+              <div key={index} style={{ backgroundColor: colors.background, padding: '32px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', textAlign: 'center' }}>
+                <div style={{ width: '56px', height: '56px', backgroundColor: colors.primary, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontSize: '24px', fontWeight: 'bold', margin: '0 auto 20px' }}>{step.step}</div>
+                <div style={{ width: '48px', height: '48px', backgroundColor: `${colors.primary}15`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <step.icon color={colors.primary} size={24} />
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <step.icon className="text-green-600" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{step.description}</p>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>{step.title}</h3>
+                <p style={{ fontSize: '14px', color: colors.mutedForeground, lineHeight: '1.6' }}>{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Currency Showcase Wheel */}
-      <section id="investments" className="py-20 bg-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-600 rounded-full"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-green-600 rounded-full"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Our Currency Options</h2>
-            <p className="text-xl text-gray-600">Invest in 6 global currencies - All with guaranteed 100% returns in 20 days</p>
+      {/* Currency Options */}
+      <section id="investments" style={{ padding: '48px 16px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>Our Currency Options</h2>
+            <p style={{ fontSize: '16px', color: colors.mutedForeground }}>Invest in 6 global currencies — All with guaranteed 100% returns</p>
           </div>
-
-          <div className="flex flex-col items-center">
-            {/* Rotating Currency Wheel */}
-            <div className="relative w-96 h-96 mb-12">
-              {/* Center Circle */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-600 rounded-full z-20 shadow-2xl flex flex-col items-center justify-center text-white border-4 border-white">
-                <TrendingUp size={32} className="mb-2" />
-                <div className="text-sm font-bold">100%</div>
-                <div className="text-xs">Returns</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', maxWidth: '960px', margin: '0 auto' }}>
+            {investmentOptions.map((option, index) => (
+              <div key={index} style={{ backgroundColor: `${colors.primary}08`, padding: '20px', borderRadius: '12px', border: `2px solid ${colors.primary}40` }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '28px' }}>{option.flag}</span>
+                    <div>
+                      <div style={{ fontWeight: 'bold', color: colors.foreground }}>{option.code}</div>
+                      <div style={{ fontSize: '11px', color: colors.mutedForeground }}>{option.currency}</div>
+                    </div>
+                  </div>
+                  <span style={{ padding: '4px 8px', backgroundColor: colors.accent, color: colors.foreground, borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>+100%</span>
+                </div>
+                <div style={{ fontSize: '13px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ color: colors.mutedForeground }}>Invest:</span>
+                    <span style={{ fontWeight: 'bold', color: colors.foreground }}>KES {option.amount}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: colors.mutedForeground }}>Returns:</span>
+                    <span style={{ fontWeight: 'bold', color: colors.accent }}>KES {option.returns}</span>
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '48px', textAlign: 'center' }}>
+            <button onClick={() => navigate('/register')} style={{ padding: '16px 40px', backgroundColor: colors.primary, color: colors.white, borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              Start Investing Today <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </section>
 
-              {/* Rotating Wheel */}
-              <div className="w-full h-full relative animate-spin-slow">
-                {investmentOptions.map((option, index) => {
-                  const angle = (360 / investmentOptions.length) * index;
-                  const radius = 160;
-                  const x = radius * Math.cos((angle - 90) * Math.PI / 180);
-                  const y = radius * Math.sin((angle - 90) * Math.PI / 180);
-                  
+      {/* Spinning Wheel Section */}
+      <section id="spinning-wheel" style={{ backgroundColor: colors.dark, color: colors.white, padding: '48px 16px' }}>
+        <div className="spin-content" style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '48px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="wheel" style={{ position: 'relative', width: '280px', height: '280px' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '56px', height: '56px', backgroundColor: colors.background, borderRadius: '50%', zIndex: 30, boxShadow: '0 10px 25px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `4px solid ${colors.primary}` }}>
+                <div style={{ width: '28px', height: '28px', backgroundColor: colors.primary, borderRadius: '50%' }}></div>
+              </div>
+              <div style={{ position: 'absolute', top: '-16px', left: '50%', transform: 'translateX(-50%)', zIndex: 40, width: 0, height: 0, borderLeft: '12px solid transparent', borderRight: '12px solid transparent', borderTop: `28px solid ${colors.accent}` }}></div>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden', border: `8px solid ${colors.accent}`, animation: isSpinning ? 'spin 3s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards' : 'none' }}>
+                {wheelPrizes.map((prize, index) => {
+                  const rotation = (360 / wheelPrizes.length) * index;
                   return (
-                    <div
-                      key={index}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                      style={{
-                        transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                      }}
-                    >
-                      <div className="bg-white rounded-2xl p-4 shadow-xl border-2 border-green-600 w-28 h-28 flex flex-col items-center justify-center hover:scale-110 transition-transform">
-                        <div className="text-3xl mb-1">{option.flag}</div>
-                        <div className="text-xs font-bold text-gray-900 text-center">{option.code}</div>
-                        <div className="text-xs text-green-600 font-bold mt-1">KES {option.amount}</div>
-                      </div>
+                    <div key={index} style={{ position: 'absolute', width: '50%', height: '50%', transformOrigin: 'bottom right', transform: `rotate(${rotation}deg)`, clipPath: 'polygon(100% 100%, 0% 100%, 50% 0%)', top: 0, left: 0, backgroundColor: prize.color }}>
+                      <span style={{ position: 'absolute', color: colors.white, fontWeight: 'bold', fontSize: '11px', top: '30%', left: '55%', transform: 'rotate(30deg)', width: '60px', textAlign: 'center' }}>{prize.name}</span>
                     </div>
                   );
                 })}
               </div>
-
-              {/* Orbit Ring */}
-              <div className="absolute inset-0 border-4 border-green-600 border-dashed rounded-full opacity-30"></div>
             </div>
 
-            {/* Currency Details Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-              {investmentOptions.map((option, index) => (
-                <div key={index} className="bg-green-50 p-6 rounded-xl border-2 border-green-600 hover:shadow-lg transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-3xl">{option.flag}</span>
-                      <div>
-                        <div className="font-bold text-gray-900">{option.code}</div>
-                        <div className="text-xs text-gray-600">{option.currency}</div>
-                      </div>
-                    </div>
-                    <div className="px-2 py-1 bg-green-600 text-white rounded-full text-xs font-bold">
-                      +100%
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Investment:</span>
-                      <span className="font-bold text-gray-900">KES {option.amount}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Returns:</span>
-                      <span className="font-bold text-green-600">KES {option.returns}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Profit:</span>
-                      <span className="font-bold text-green-700">KES {option.amount}</span>
-                    </div>
-                    <div className="text-center pt-2 border-t border-green-300">
-                      <span className="text-xs text-gray-600">Matures in 20 days</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <button onClick={spinWheel} disabled={isSpinning || hasSpun} style={{ marginTop: '32px', padding: '16px 40px', borderRadius: '50px', fontWeight: 'bold', fontSize: '18px', border: 'none', cursor: isSpinning || hasSpun ? 'not-allowed' : 'pointer', backgroundColor: isSpinning || hasSpun ? colors.mutedForeground : colors.accent, color: isSpinning || hasSpun ? '#999' : colors.foreground }}>
+              {isSpinning ? 'SPINNING...' : hasSpun ? 'ALREADY SPUN!' : 'SPIN NOW!'}
+            </button>
 
-            <div className="mt-12 text-center">
-              <button onClick={() => navigate('/register')} className="px-10 py-4 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition flex items-center mx-auto">
-                Start Investing Today <ArrowRight className="ml-2" size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <style jsx>{`
-          @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          .animate-spin-slow {
-            animation: spin-slow 30s linear infinite;
-          }
-        `}</style>
-      </section>
-
-      {/* Spinning Wheel Section */}
-      <section id="spinning-wheel" className="py-20 bg-gray-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-600 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-600 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">Spin & Win Your Signup Bonus!</h2>
-            <p className="text-xl text-gray-300">Try your luck and win up to KES 1,000 bonus when you create an account</p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col items-center">
-              <div className="relative">
-                {/* Wheel Container */}
-                <div className="relative w-80 h-80 sm:w-96 sm:h-96">
-                  {/* Center Pin */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full z-30 shadow-2xl flex items-center justify-center border-4 border-green-600">
-                    <div className="w-8 h-8 bg-green-600 rounded-full"></div>
-                  </div>
-
-                  {/* Pointer */}
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-40">
-                    <div className="w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg" style={{borderTopWidth: '24px'}}></div>
-                  </div>
-
-                  {/* Spinning Wheel */}
-                  <div 
-                    className={`w-full h-full rounded-full shadow-2xl relative ${isSpinning ? 'animate-spin' : ''}`}
-                    style={{
-                      animation: isSpinning ? 'spin 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none'
-                    }}
-                  >
-                    {wheelPrizes.map((prize, index) => {
-                      const rotation = (360 / wheelPrizes.length) * index;
-                      return (
-                        <div
-                          key={index}
-                          className={`absolute w-1/2 h-1/2 origin-bottom-right ${prize.color}`}
-                          style={{
-                            transform: `rotate(${rotation}deg)`,
-                            clipPath: 'polygon(100% 100%, 0% 100%, 50% 0%)',
-                            top: 0,
-                            left: 0,
-                          }}
-                        >
-                          <div 
-                            className={`absolute ${prize.textColor} font-bold text-xs sm:text-sm`}
-                            style={{
-                              top: '30%',
-                              left: '60%',
-                              transform: `rotate(${30}deg)`,
-                              width: '80px',
-                              textAlign: 'center'
-                            }}
-                          >
-                            {prize.name}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Outer Ring */}
-                  <div className="absolute inset-0 rounded-full border-8 border-yellow-400"></div>
-                </div>
+            {winner && (
+              <div style={{ marginTop: '24px', backgroundColor: colors.primary, color: colors.white, padding: '16px 32px', borderRadius: '12px', textAlign: 'center', animation: 'bounce 1s infinite' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>🎉 CONGRATULATIONS! 🎉</div>
+                <div style={{ fontSize: '22px', fontWeight: 'bold' }}>{winner.name}</div>
+                <div style={{ fontSize: '12px', marginTop: '8px', opacity: 0.9 }}>Sign up now to claim!</div>
               </div>
-
-              <button 
-                onClick={spinWheel}
-                disabled={isSpinning || hasSpun}
-                className={`mt-8 px-10 py-4 rounded-full font-bold text-xl transition-all transform ${
-                  isSpinning || hasSpun 
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-                    : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 hover:scale-105 shadow-lg hover:shadow-xl'
-                }`}
-              >
-                {isSpinning ? 'SPINNING...' : hasSpun ? 'ALREADY SPUN!' : 'SPIN NOW!'}
-              </button>
-
-              {winner && (
-                <div className="mt-6 text-center animate-bounce">
-                  <div className="bg-green-600 text-white px-8 py-4 rounded-xl shadow-xl">
-                    <div className="text-sm font-semibold mb-1">🎉 CONGRATULATIONS! 🎉</div>
-                    <div className="text-2xl font-bold">{winner.name}</div>
-                    <div className="text-sm mt-2 opacity-90">Sign up now to claim your points!</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="text-white">
-              <h3 className="text-3xl font-bold mb-6">How to Play the Points Game</h3>
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-lg mr-4 flex-shrink-0">1</div>
-                  <div>
-                    <h4 className="font-bold text-xl mb-2">Spin the Wheel</h4>
-                    <p className="text-gray-300">Click the "SPIN NOW" button and watch the wheel spin to reveal your points reward</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-lg mr-4 flex-shrink-0">2</div>
-                  <div>
-                    <h4 className="font-bold text-xl mb-2">Create Your Account</h4>
-                    <p className="text-gray-300">Sign up with your details and complete the quick KYC verification process</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-lg mr-4 flex-shrink-0">3</div>
-                  <div>
-                    <h4 className="font-bold text-xl mb-2">Get Your Points</h4>
-                    <p className="text-gray-300">Your points will be automatically credited to your account - ready to use!</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 bg-green-600 p-6 rounded-xl">
-                <div className="flex items-center mb-3">
-                  <Award className="mr-3" size={28} />
-                  <h4 className="font-bold text-xl">Special Offer!</h4>
-                </div>
-                <p className="text-green-50">New users who sign up today also get access to exclusive investment opportunities with priority processing!</p>
-              </div>
-
-              <a href="#spinning-wheel" className="mt-8 w-full py-4 text-green-600 font-bold text-lg hover:text-green-700 transition flex items-center justify-center">
-                Play Now <ArrowRight className="ml-2" size={20} />
-              </a>
-            </div>
+            )}
           </div>
-        </div>
 
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(1800deg); }
-          }
-        `}</style>
-      </section>
-
-
-
-      {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-gray-600">Everything you need to know about investing with us</p>
-          </div>
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white p-8 rounded-xl shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{faq.question}</h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+          <div style={{ textAlign: 'left' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px' }}>How to Play the Points Game</h3>
+            {[
+              { num: '1', title: 'Spin the Wheel', desc: 'Click "SPIN NOW" to reveal your points reward' },
+              { num: '2', title: 'Create Your Account', desc: 'Sign up and complete verification' },
+              { num: '3', title: 'Get Your Points', desc: 'Points are automatically credited to your account' },
+            ].map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '24px' }}>
+                <div style={{ width: '36px', height: '36px', backgroundColor: colors.primary, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginRight: '16px', flexShrink: 0 }}>{item.num}</div>
+                <div>
+                  <h4 style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>{item.title}</h4>
+                  <p style={{ color: '#9CA3AF', fontSize: '14px' }}>{item.desc}</p>
+                </div>
               </div>
             ))}
+
+            <div style={{ marginTop: '32px', backgroundColor: colors.primary, padding: '24px', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                <Award color={colors.accent} size={24} style={{ marginRight: '12px' }} />
+                <h4 style={{ fontWeight: 'bold', fontSize: '18px' }}>Special Offer!</h4>
+              </div>
+              <p style={{ opacity: 0.9, fontSize: '14px' }}>New users get access to exclusive investment opportunities!</p>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" style={{ backgroundColor: `${colors.muted}50`, padding: '48px 16px' }}>
+        <div style={{ maxWidth: '896px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>Frequently Asked Questions</h2>
+            <p style={{ fontSize: '16px', color: colors.mutedForeground }}>Everything you need to know</p>
+          </div>
+          {faqs.map((faq, index) => (
+            <div key={index} style={{ backgroundColor: colors.background, padding: '32px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: colors.foreground, marginBottom: '12px' }}>{faq.question}</h3>
+              <p style={{ fontSize: '14px', color: colors.mutedForeground, lineHeight: '1.6' }}>{faq.answer}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-green-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Double Your Money?</h2>
-          <p className="text-xl mb-10 text-green-50 leading-relaxed">
-            Join 10,000+ Kenyans already earning guaranteed returns. Start with just KES 100 today.
-          </p>
-          <button onClick={() => navigate('/register')} className="px-12 py-5 bg-white text-green-600 rounded-lg font-bold text-xl hover:bg-gray-100 transition inline-flex items-center">
-            Create Free Account <ArrowRight className="ml-3" size={24} />
+      <section style={{ backgroundColor: colors.primary, color: colors.white, padding: '48px 16px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '896px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px' }}>Ready to Double Your Money?</h2>
+          <p style={{ fontSize: '16px', marginBottom: '32px', opacity: 0.9, lineHeight: '1.6' }}>Join 10,000+ Kenyans already earning guaranteed returns. Start with just KES 100 today.</p>
+          <button onClick={() => navigate('/register')} style={{ padding: '20px 48px', backgroundColor: colors.background, color: colors.primary, borderRadius: '8px', fontWeight: 'bold', fontSize: '18px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+            Create Free Account <ArrowRight size={24} />
           </button>
-          <div className="mt-8 flex flex-wrap justify-center gap-8 text-green-100">
-            <div className="flex items-center">
-              <CheckCircle className="mr-2" size={20} />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="mr-2" size={20} />
-              <span>Instant M-Pesa</span>
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="mr-2" size={20} />
-              <span>100% secure</span>
-            </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px', marginTop: '32px', opacity: 0.9 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}><CheckCircle size={18} /> No hidden fees</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}><CheckCircle size={18} /> Instant M-Pesa</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}><CheckCircle size={18} /> 100% secure</span>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+      <footer style={{ backgroundColor: colors.dark, color: colors.white, padding: '48px 16px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', marginBottom: '32px' }}>
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">L</span>
-                </div>
-                <span className="text-xl font-bold">LiquiInvest KE</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ width: '40px', height: '40px', backgroundColor: colors.primary, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontWeight: 'bold', fontSize: '20px' }}>L</div>
+                <span style={{ fontSize: '20px', fontWeight: 'bold' }}>LiquiInvest KE</span>
               </div>
-              <p className="text-gray-400 leading-relaxed">
-                Kenya's premier investment platform for guaranteed returns. Licensed and regulated for your safety.
-              </p>
+              <p style={{ color: '#9CA3AF', fontSize: '14px', lineHeight: '1.6' }}>Kenya's premier investment platform for guaranteed returns.</p>
             </div>
             <div>
-              <h4 className="font-bold text-lg mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#benefits" className="hover:text-green-400">Benefits</a></li>
-                <li><a href="#how-it-works" className="hover:text-green-400">How It Works</a></li>
-                <li><a href="#investments" className="hover:text-green-400">Investments</a></li>
-                <li><a href="#faq" className="hover:text-green-400">FAQ</a></li>
+              <h4 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '16px' }}>Quick Links</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li><a href="#benefits" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>Benefits</a></li>
+                <li><a href="#how-it-works" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>How It Works</a></li>
+                <li><a href="#investments" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>Investments</a></li>
+                <li><a href="#faq" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>FAQ</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-lg mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-green-400">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-green-400">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-green-400">About Us</a></li>
-                <li><a href="#" className="hover:text-green-400">Contact Support</a></li>
+              <h4 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '16px' }}>Legal</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li><a href="#" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>Terms of Service</a></li>
+                <li><a href="#" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>Privacy Policy</a></li>
+                <li><a href="#" style={{ color: '#9CA3AF', textDecoration: 'none', fontSize: '14px', display: 'block', marginBottom: '8px' }}>About Us</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-lg mb-4">Contact Us</h4>
-              <ul className="space-y-3 text-gray-400">
-                <li className="flex items-start">
-                  <Mail className="mr-2 mt-1 flex-shrink-0" size={18} />
-                  <span>info@liquiinvest.co.ke</span>
-                </li>
-                <li className="flex items-start">
-                  <Phone className="mr-2 mt-1 flex-shrink-0" size={18} />
-                  <span>+254 XXX XXX XXX</span>
-                </li>
-                <li className="flex items-start">
-                  <MapPin className="mr-2 mt-1 flex-shrink-0" size={18} />
-                  <span>Nairobi, Kenya</span>
-                </li>
-              </ul>
+              <h4 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '16px' }}>Contact Us</h4>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#9CA3AF', fontSize: '14px', marginBottom: '12px' }}><Mail size={16} /> info@liquiinvest.co.ke</div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#9CA3AF', fontSize: '14px', marginBottom: '12px' }}><Phone size={16} /> +254 XXX XXX XXX</div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#9CA3AF', fontSize: '14px', marginBottom: '12px' }}><MapPin size={16} /> Nairobi, Kenya</div>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <p className="text-gray-400 mb-2">Licensed by Central Bank of Kenya (CBK) • Regulated by Capital Markets Authority (CMA)</p>
-            <p className="text-gray-500">© 2024 LiquiInvest KE. All rights reserved.</p>
+          <div style={{ borderTop: '1px solid #374151', paddingTop: '32px', textAlign: 'center' }}>
+            <p style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '8px' }}>Licensed by Central Bank of Kenya (CBK) • Regulated by Capital Markets Authority (CMA)</p>
+            <p style={{ color: '#6B7280', fontSize: '12px' }}>© 2024 LiquiInvest KE. All rights reserved.</p>
           </div>
         </div>
       </footer>

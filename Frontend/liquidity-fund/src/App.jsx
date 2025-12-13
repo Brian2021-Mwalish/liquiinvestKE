@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
-import Footer from './components/Footer';
 
 const App = () => {
   const location = useLocation();
@@ -9,7 +8,6 @@ const App = () => {
   return (
     <>
       <AppRoutes />
-      {location.pathname !== '/login' && <Footer />}
     </>
   );
 };
