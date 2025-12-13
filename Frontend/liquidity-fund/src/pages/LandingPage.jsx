@@ -232,13 +232,13 @@ const LandingPage = () => {
 
             <div>
               <div className="inline-block bg-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                🇰🇪 Trusted by 10,000+ Kenyan Investors
+                🇰🇪 Trusted by People Who Value Growth
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold mb-6 leading-tight">
                 Turn KES 100 Into KES 200 in Just 20 Days
               </h1>
               <p className="text-xl mb-8 text-green-50 leading-relaxed">
-                Kenya's most trusted investment platform. Safe, licensed, and guaranteed returns. Start building wealth today with as little as KES 100.
+                People trust our investment platform for safe, licensed opportunities that grow wealth reliably. Start your journey today with KES 100
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button onClick={() => navigate('/register')} className="px-8 py-4 bg-white text-green-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition flex items-center justify-center">
