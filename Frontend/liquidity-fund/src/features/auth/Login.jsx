@@ -17,8 +17,7 @@ const schema = yup.object().shape({
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
+
   const navigate = useNavigate();
 
   const {
@@ -84,8 +83,6 @@ const Login = () => {
       return;
     }
 
-    const loaderTimeout = setTimeout(() => setIsLoggingIn(true), 500);
-
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/login/`, {
         method: "POST",
@@ -94,9 +91,6 @@ const Login = () => {
       });
 
       const result = await res.json();
-      
-      clearTimeout(loaderTimeout);
-      setIsLoggingIn(false);
 
       if (!res.ok) {
         if (result.errors) {
@@ -115,15 +109,11 @@ const Login = () => {
       toast.success("Login successful! Redirecting...");
       await handleLoginNavigation(result.access, result.refresh);
     } catch (err) {
-      clearTimeout(loaderTimeout);
-      setIsLoggingIn(false);
       toast.error("Connection error. Please try again.");
     }
   };
 
   const handleGoogleLogin = async (credentialResponse) => {
-    const loaderTimeout = setTimeout(() => setIsGoogleLoggingIn(true), 500);
-
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/google-login/`, {
         method: "POST",
@@ -132,9 +122,6 @@ const Login = () => {
       });
 
       const result = await res.json();
-      
-      clearTimeout(loaderTimeout);
-      setIsGoogleLoggingIn(false);
 
       if (!res.ok) {
         if (result.errors) {
@@ -153,8 +140,6 @@ const Login = () => {
       toast.success("Google login successful! Redirecting...");
       await handleLoginNavigation(result.access, result.refresh);
     } catch (err) {
-      clearTimeout(loaderTimeout);
-      setIsGoogleLoggingIn(false);
       toast.error("Connection error. Please try again.");
     }
   };
@@ -254,23 +239,13 @@ const Login = () => {
             </div>
 
             {/* Google Login */}
-            <div className="relative">
-              {isGoogleLoggingIn && (
-                <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg z-10">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-[#0F5D4E] border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-[#0F5D4E] text-sm font-medium">Signing in...</span>
-                  </div>
-                </div>
-              )}
-              <GoogleLogin
-                onSuccess={handleGoogleLogin}
-                onError={() => toast.error("Google login failed")}
-                useOneTap
-                size="large"
-                width="100%"
-              />
-            </div>
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => toast.error("Google login failed")}
+              useOneTap
+              size="large"
+              width="100%"
+            />
 
             <div className="flex items-center">
               <div className="flex-grow border-t border-[#0F5D4E]/30"></div>
@@ -329,15 +304,10 @@ const Login = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoggingIn || !isOnline}
+                disabled={!isOnline}
                 className="w-full bg-[#0F5D4E] text-white py-2 sm:py-2.5 rounded-lg font-semibold text-sm hover:bg-[#0A3D32] transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-md"
               >
-                {isLoggingIn ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Signing in...</span>
-                  </>
-                ) : !isOnline ? (
+                {!isOnline ? (
                   <>
                     <WifiOff size={16} />
                     <span>You're Offline</span>

@@ -1,5 +1,6 @@
 # users/urls.py
 from django.urls import path
+
 from .views import (
     RegisterView,
     LoginView,
@@ -20,7 +21,9 @@ from .views import (
     ReferralCodeView,       # ✅ added
     ReferralHistoryView,    # ✅ added
     admin_award_wallet,     # Admin wallet award endpoint
+    DeleteAccountView,      # Delete account endpoint
 )
+
 
 urlpatterns = [
     # Auth
@@ -36,6 +39,9 @@ urlpatterns = [
     # Password reset
     path("forgot-password/", ForgotPasswordView.as_view(), name="forgot-password"),
     path("reset-password/<uidb64>/<token>/", ResetPasswordView.as_view(), name="reset-password"),
+
+    # Account Management
+    path("delete-account/", DeleteAccountView.as_view(), name="delete-account"),
 
     # Admin User Management
     path("users/", UserListView.as_view(), name="user-list"),

@@ -5,6 +5,7 @@ import uuid
 from Users.models import CustomUser
 
 
+
 class Rental(models.Model):
     """
     Represents a currency rental created upon successful payment.
@@ -35,6 +36,13 @@ class Rental(models.Model):
     duration_days = models.PositiveIntegerField(default=20)  # Duration in days
     end_date = models.DateTimeField(null=True, blank=True)  # Calculated end date
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # Unique identifier
+    
+    # Enhanced tracking fields for the new system
+    is_completed = models.BooleanField(default=False)  # Whether 20-day period is over
+    completion_date = models.DateTimeField(null=True, blank=True)  # When rental matured
+    is_claimed = models.BooleanField(default=False)  # Whether doubled amount has been added to wallet
+    referrer = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name="referred_rentals")
+    referral_reward_given = models.BooleanField(default=False)  # Whether referral reward has been given
 
     def save(self, *args, **kwargs):
         if not self.end_date:

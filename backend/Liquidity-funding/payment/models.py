@@ -7,6 +7,7 @@ from datetime import timedelta
 from Users.models import CustomUser
 
 
+
 # -----------------------
 # Wallet Model
 # -----------------------
@@ -16,7 +17,8 @@ class Wallet(models.Model):
     Updated automatically whenever balance changes or user is created.
     """
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="wallet")
-    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  # Available for withdrawal
+    rental_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  # Money locked in active rentals
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -26,6 +28,56 @@ class Wallet(models.Model):
         ordering = ["-last_updated"]
         verbose_name = "Wallet"
         verbose_name_plural = "Wallets"
+
+    # -----------------------
+    # Balance Calculation Methods
+    # -----------------------
+    @property
+    def available_balance(self):
+        """Money available for withdrawal (balance only)"""
+        return self.balance
+
+    @property
+    def locked_rental_balance(self):
+        """Money locked in active rentals"""
+        return self.rental_balance
+
+    @property
+    def total_balance(self):
+        """Total money across all accounts"""
+        return self.balance + self.rental_balance
+
+    def can_withdraw(self, amount):
+        """Check if user can withdraw the specified amount"""
+        return amount <= self.balance
+
+    def add_referral_reward(self, amount):
+        """Add referral reward to wallet balance"""
+        self.balance += amount
+        self.save()
+
+    def add_admin_award(self, amount):
+        """Add admin award to wallet balance"""
+        self.balance += amount
+        self.save()
+
+    def create_rental_payment(self, amount):
+        """Process rental payment by moving money from wallet to rental balance"""
+        if self.balance >= amount:
+            self.balance -= amount
+            self.rental_balance += amount
+            self.save()
+            return True
+        return False
+
+    def complete_rental(self, rental_amount, return_amount):
+        """Complete a rental by moving money from rental_balance to balance"""
+        if self.rental_balance >= rental_amount:
+            self.rental_balance -= rental_amount
+            self.balance += return_amount
+            self.save()
+            return True
+        return False
 
 
 # -----------------------

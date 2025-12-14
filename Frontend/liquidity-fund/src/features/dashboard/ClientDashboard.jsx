@@ -22,6 +22,7 @@ import { ChevronRight } from "lucide-react";
 import { CheckCircle } from "lucide-react";
 import { Shield } from "lucide-react";
 import { Activity } from "lucide-react";
+import History from "../transactions/History";
 
 const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState('rentals');
@@ -39,7 +40,7 @@ const ClientDashboard = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [referralReward, setReferralReward] = useState(null);
   const [liveProfit, setLiveProfit] = useState({});
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('profile')) || null);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [pendingReturns, setPendingReturns] = useState(0);
   const [isMaintenance, setIsMaintenance] = useState(false);
@@ -49,6 +50,7 @@ const ClientDashboard = () => {
   const [referrer, setReferrer] = useState(null);
   const [referralLoading, setReferralLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const token = localStorage.getItem('access');
 
@@ -64,7 +66,7 @@ const ClientDashboard = () => {
   const showReferralReward = (reward) => {
     if (reward && reward > 0) {
       setReferralReward(reward);
-      setTimeout(() => setReferralReward(null), 5000); // Hide after 5 seconds
+      setTimeout(() => setReferralReward(null), 5000);
     }
   };
 
@@ -92,8 +94,6 @@ const ClientDashboard = () => {
       console.error('Failed to fetch balance:', error);
     }
   };
-
-
 
   const fetchUserRentals = async () => {
     try {
@@ -190,14 +190,10 @@ const ClientDashboard = () => {
           clearInterval(pollInterval);
           await fetchUserRentals();
           
-          // Check for referral reward by comparing balance change with rental amount
           const expectedBalanceChange = -selectedCurrency.price;
           const actualBalanceChange = balance - initialBalance;
           
-          // If balance decreased by more than expected, it might include referral reward processing
-          // (This is a simplified check - in a real system, you'd get this from the backend)
           if (actualBalanceChange < expectedBalanceChange) {
-            // Assume the difference indicates a referral reward was processed
             const estimatedReward = Math.abs(actualBalanceChange - expectedBalanceChange) / 2;
             showReferralReward(estimatedReward);
           }
@@ -261,7 +257,6 @@ const ClientDashboard = () => {
     if (!token) return;
     const interval = setInterval(() => {
       fetchBalance();
-      // Update live profit for active rentals
       const newLiveProfit = {};
       activeRentals.forEach(rental => {
         if (rental.status === 'active') {
@@ -272,13 +267,12 @@ const ClientDashboard = () => {
           const elapsed = now - startDate;
           const progress = Math.min((elapsed / totalDuration) * 100, 100) / 100;
           const profit = (rental.expected_return - rental.amount) * progress;
-          // Add small random fluctuation for realism
           const fluctuation = (Math.random() - 0.5) * 10;
           newLiveProfit[rental.id] = Math.max(0, profit + fluctuation);
         }
       });
       setLiveProfit(newLiveProfit);
-    }, 3000); // Update every 3 seconds
+    }, 3000);
     return () => clearInterval(interval);
   }, [token, activeRentals]);
 
@@ -322,12 +316,10 @@ const ClientDashboard = () => {
     fetchMaintenance();
   }, []);
 
-  // Fetch referral data
   const fetchReferralData = async () => {
     try {
       setReferralLoading(true);
 
-      // Fetch all referral data in parallel for better performance
       const [codeRes, historyRes, profileRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/auth/referrals/code/`, {
           headers: {
@@ -376,7 +368,6 @@ const ClientDashboard = () => {
     if (token) fetchReferralData();
   }, [token]);
 
-  // Copy referral link
   const copyToClipboard = () => {
     const link = `${window.location.origin}/referral/${referralCode}`;
     navigator.clipboard.writeText(link);
@@ -409,20 +400,22 @@ const ClientDashboard = () => {
   };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, gradient = false }) => (
-    <div className={`${gradient ? 'bg-gradient-to-br from-green-600 to-emerald-600' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border ${gradient ? 'border-green-500' : 'border-gray-200'}`}>
+    <div className={`${gradient ? 'bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E]' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border ${gradient ? 'border-[#A8E6CF]' : 'border-gray-200'}`}>
       <div className="flex items-start justify-between mb-3">
-        <h3 className={`text-sm font-medium ${gradient ? 'text-white/90' : 'text-gray-600'}`}>{title}</h3>
-        {Icon && <Icon className={`w-5 h-5 ${gradient ? 'text-white/80' : 'text-green-600'}`} />}
+        <h3 className={`text-sm font-medium ${gradient ? 'text-[#A8E6CF]' : 'text-gray-600'}`}>{title}</h3>
+        {Icon && <Icon className={`w-5 h-5 ${gradient ? 'text-[#A8E6CF]' : 'text-[#0F5D4E]'}`} />}
       </div>
       <div className={`text-3xl font-bold mb-1 ${gradient ? 'text-white' : 'text-gray-900'}`}>{value}</div>
-      {subtitle && <p className={`text-sm ${gradient ? 'text-white/70' : 'text-gray-500'}`}>{subtitle}</p>}
+      {subtitle && <p className={`text-sm ${gradient ? 'text-[#A8E6CF]/80' : 'text-gray-500'}`}>{subtitle}</p>}
     </div>
   );
+
 
   const navItems = [
     { id: 'rentals', label: 'My Rentals', icon: FileText },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'rent', label: 'Rent Currency', icon: Coins },
+    { id: 'history', label: 'Transaction History', icon: Activity },
     { id: 'referrals', label: 'Referrals', icon: Users },
     { id: 'account', label: 'Account Settings', icon: Settings },
     { id: 'support', label: 'Support', icon: HelpCircle }
@@ -437,7 +430,7 @@ const ClientDashboard = () => {
           <div className="space-y-6 animate-in fade-in duration-300">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Wallet className="w-8 h-8 text-green-600" />
+                <Wallet className="w-8 h-8 text-[#0F5D4E]" />
                 <h2 className="text-3xl font-bold text-gray-900">Wallet</h2>
               </div>
             </div>
@@ -458,7 +451,7 @@ const ClientDashboard = () => {
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg">
               <Link
                 to="/withdraw"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0A3D32] text-white font-medium rounded-lg hover:bg-[#0F5D4E] transition-all shadow-md hover:shadow-lg"
               >
                 <ArrowUpRight className="w-5 h-5" />
                 Withdraw Funds
@@ -466,8 +459,6 @@ const ClientDashboard = () => {
             </div>
           </div>
         );
-
-
 
       case 'rent':
         return (
@@ -477,17 +468,17 @@ const ClientDashboard = () => {
                 <h2 className="text-3xl font-bold mb-2 text-gray-900">Rent Currency</h2>
                 <p className="text-gray-600">Choose a currency to rent and double your investment in 20 days</p>
               </div>
-              <Coins className="w-8 h-8 text-green-600 hidden md:block" />
+              <Coins className="w-8 h-8 text-[#0F5D4E] hidden md:block" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {currencies.map((currency, index) => {
                 const gradients = [
-                  'from-green-500 to-emerald-500',
-                  'from-emerald-500 to-teal-500',
-                  'from-teal-500 to-green-600',
-                  'from-green-600 to-emerald-600',
-                  'from-emerald-600 to-teal-600',
-                  'from-teal-600 to-green-700'
+                  'from-[#0F5D4E] to-[#0A3D32]',
+                  'from-[#0A3D32] to-[#0F5D4E]',
+                  'from-[#0F5D4E] to-[#0A3D32]',
+                  'from-[#0A3D32] to-[#0F5D4E]',
+                  'from-[#0F5D4E] to-[#0A3D32]',
+                  'from-[#0A3D32] to-[#0F5D4E]'
                 ];
                 return (
                   <div 
@@ -500,9 +491,9 @@ const ClientDashboard = () => {
                     </div>
                     <div className="text-3xl mb-2 font-bold text-gray-900">{currency.code}</div>
                     <h3 className="text-base font-medium text-gray-600 mb-4">{currency.name}</h3>
-                    <div className="text-4xl font-bold text-green-600 mb-2">KES {currency.price}</div>
+                    <div className="text-4xl font-bold text-[#0F5D4E] mb-2">KES {currency.price}</div>
                     <div className="text-sm text-gray-600 mb-6">
-                      Return: <span className="text-emerald-600 font-semibold text-lg">KES {currency.price * 2}</span>
+                      Return: <span className="text-[#0A3D32] font-semibold text-lg">KES {currency.price * 2}</span>
                     </div>
                     <button className={`w-full bg-gradient-to-r ${gradients[index]} text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all group-hover:scale-105`}>
                       Pay with M-Pesa
@@ -522,34 +513,33 @@ const ClientDashboard = () => {
                 <h2 className="text-3xl font-bold mb-2 text-gray-900">My Rentals</h2>
                 <p className="text-gray-600">Track your active and completed currency rentals</p>
               </div>
-              <FileText className="w-8 h-8 text-green-600 hidden md:block" />
+              <FileText className="w-8 h-8 text-[#0F5D4E] hidden md:block" />
             </div>
 
-            {/* Portfolio Summary */}
             {activeRentals.length > 0 && (
-              <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+              <div className="bg-gradient-to-r from-[#0A3D32] via-[#0F5D4E] to-[#0A3D32] rounded-2xl p-6 text-white shadow-lg">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl md:text-3xl font-bold">{activeRentals.length}</div>
-                    <div className="text-sm opacity-90">Active Rentals</div>
+                    <div className="text-sm text-[#A8E6CF]">Active Rentals</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl md:text-3xl font-bold">
                       KES {activeRentals.reduce((sum, rental) => sum + rental.amount, 0).toLocaleString()}
                     </div>
-                    <div className="text-sm opacity-90">Total Investment</div>
+                    <div className="text-sm text-[#A8E6CF]">Total Investment</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl md:text-3xl font-bold">
                       KES {Object.values(liveProfit).reduce((sum, profit) => sum + profit, 0).toFixed(2)}
                     </div>
-                    <div className="text-sm opacity-90">Current Profit</div>
+                    <div className="text-sm text-[#A8E6CF]">Current Profit</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl md:text-3xl font-bold">
                       KES {activeRentals.reduce((sum, rental) => sum + rental.expected_return, 0).toLocaleString()}
                     </div>
-                    <div className="text-sm opacity-90">Expected Return</div>
+                    <div className="text-sm text-[#A8E6CF]">Expected Return</div>
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-center">
@@ -568,27 +558,25 @@ const ClientDashboard = () => {
                   <div key={rental.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
                       <div className="flex-shrink-0 text-center lg:text-left">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 mb-3">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E] mb-3">
                           <span className="text-2xl font-bold text-white">{rental.currency}</span>
                         </div>
                         <div className="text-sm font-medium text-gray-600">
-                          Status: <span className={`${rental.status === 'active' ? 'text-green-600' : 'text-emerald-600'} font-semibold`}>{rental.status}</span>
+                          Status: <span className={`${rental.status === 'active' ? 'text-[#0F5D4E]' : 'text-[#0A3D32]'} font-semibold`}>{rental.status}</span>
                         </div>
                         {rental.status === 'active' && (
                           <div className="mt-3 space-y-3">
-                            {/* Animated Processing Indicator */}
                             <div className="flex items-center justify-center">
                               <div className="relative">
-                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-600 border-t-transparent"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0F5D4E] border-t-transparent"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="h-2 w-2 bg-green-600 rounded-full animate-pulse"></div>
+                                  <div className="h-2 w-2 bg-[#0F5D4E] rounded-full animate-pulse"></div>
                                 </div>
                               </div>
                             </div>
                             
-                            {/* Dynamic Processing Messages */}
                             <div className="text-center">
-                              <p className="text-xs font-medium text-green-600 animate-pulse">
+                              <p className="text-xs font-medium text-[#0F5D4E] animate-pulse">
                                 {(() => {
                                   const messages = [
                                     "Processing rental...",
@@ -604,7 +592,6 @@ const ClientDashboard = () => {
                               <p className="text-xs text-gray-500 mt-1">ID: {rental.unique_id}</p>
                             </div>
 
-                            {/* Progress Bar */}
                             {(() => {
                               const startDate = new Date(rental.created_at || rental.start_date);
                               const endDate = new Date(rental.end_date);
@@ -616,7 +603,7 @@ const ClientDashboard = () => {
                                 <div className="w-full">
                                   <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
                                     <div
-                                      className="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 h-3 rounded-full transition-all duration-1000 relative overflow-hidden"
+                                      className="bg-gradient-to-r from-[#0F5D4E] via-[#0A3D32] to-[#0F5D4E] h-3 rounded-full transition-all duration-1000 relative overflow-hidden"
                                       style={{ width: `${progress}%` }}
                                     >
                                       <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
@@ -624,7 +611,7 @@ const ClientDashboard = () => {
                                   </div>
                                   <div className="flex justify-between items-center mt-2">
                                     <p className="text-xs text-gray-500">{Math.round(progress)}% complete</p>
-                                    <p className="text-xs text-green-600 font-medium">
+                                    <p className="text-xs text-[#0F5D4E] font-medium">
                                       {progress >= 100 ? "Completed" : `${Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))} days left`}
                                     </p>
                                   </div>
@@ -632,12 +619,11 @@ const ClientDashboard = () => {
                               );
                             })()}
 
-                            {/* Live Activity Indicators */}
                             <div className="flex justify-center space-x-2 mt-3">
                               <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                <div className="w-2 h-2 bg-[#0F5D4E] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                <div className="w-2 h-2 bg-[#0F5D4E] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                <div className="w-2 h-2 bg-[#0F5D4E] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                               </div>
                             </div>
                           </div>
@@ -650,11 +636,11 @@ const ClientDashboard = () => {
                         </div>
                         <div>
                           <div className="text-sm text-gray-600 mb-1">Expected Return</div>
-                          <div className="text-xl font-bold text-green-600">KES {rental.expected_return}</div>
+                          <div className="text-xl font-bold text-[#0F5D4E]">KES {rental.expected_return}</div>
                         </div>
                         <div>
                           <div className="text-sm text-gray-600 mb-1">Current Profit</div>
-                          <div className="text-xl font-bold text-green-600 animate-pulse">
+                          <div className="text-xl font-bold text-[#0F5D4E] animate-pulse">
                             {(() => {
                               if (rental.status === 'active') {
                                 const profit = liveProfit[rental.id] || 0;
@@ -665,8 +651,8 @@ const ClientDashboard = () => {
                           </div>
                           {rental.status === 'active' && (
                             <div className="flex items-center mt-1">
-                              <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse mr-1"></div>
-                              <span className="text-xs text-green-600">Live</span>
+                              <div className="w-1 h-1 bg-[#0F5D4E] rounded-full animate-pulse mr-1"></div>
+                              <span className="text-xs text-[#0F5D4E]">Live</span>
                             </div>
                           )}
                         </div>
@@ -680,15 +666,14 @@ const ClientDashboard = () => {
                         </div>
                       </div>
                       
-                      {/* Live Trading Activity */}
                       {rental.status === 'active' && (
-                        <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="mt-4 p-3 bg-[#A8E6CF]/20 rounded-lg border border-[#A8E6CF]">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-xs font-medium text-green-700">Live Trading Active</span>
+                              <div className="w-2 h-2 bg-[#0F5D4E] rounded-full animate-pulse"></div>
+                              <span className="text-xs font-medium text-[#0A3D32]">Live Trading Active</span>
                             </div>
-                            <div className="text-xs text-green-600">
+                            <div className="text-xs text-[#0F5D4E]">
                               {(() => {
                                 const activities = [
                                   "Analyzing market trends...",
@@ -715,7 +700,7 @@ const ClientDashboard = () => {
                 <p className="text-gray-600 mb-6">Start renting currencies to see them here</p>
                 <button 
                   onClick={() => setActiveTab('rent')} 
-                  className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-green-700 transition-all shadow-md hover:shadow-lg"
+                  className="inline-flex items-center gap-2 bg-[#0A3D32] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#0F5D4E] transition-all shadow-md hover:shadow-lg"
                 >
                   Start Renting
                   <ChevronRight className="w-5 h-5" />
@@ -733,25 +718,24 @@ const ClientDashboard = () => {
                 <h2 className="text-3xl font-bold mb-2 text-gray-900">Referral Program</h2>
                 <p className="text-gray-600">Share your referral code and earn rewards</p>
               </div>
-              <Users className="w-8 h-8 text-green-600 hidden md:block" />
+              <Users className="w-8 h-8 text-[#0F5D4E] hidden md:block" />
             </div>
 
             {referralLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader className="w-8 h-8 animate-spin text-green-600 mr-3" />
+                <Loader className="w-8 h-8 animate-spin text-[#0F5D4E] mr-3" />
                 <span className="text-gray-600">Loading referrals...</span>
               </div>
             ) : (
               <>
-                {/* Referral Code Section */}
                 <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                   <div className="text-center mb-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Your Referral Code</h3>
                     <p className="text-gray-600">Share this code with friends to earn rewards</p>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
-                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-4 rounded-xl border-2 border-green-300">
-                      <span className="text-2xl font-mono font-bold text-green-800">
+                    <div className="bg-gradient-to-r from-[#A8E6CF]/30 to-[#A8E6CF]/50 px-6 py-4 rounded-xl border-2 border-[#0F5D4E]">
+                      <span className="text-2xl font-mono font-bold text-[#0A3D32]">
                         {referralCode || "N/A"}
                       </span>
                     </div>
@@ -759,8 +743,8 @@ const ClientDashboard = () => {
                       onClick={copyToClipboard}
                       className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-md ${
                         copied
-                          ? "bg-green-500 text-white"
-                          : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
+                          ? "bg-[#0F5D4E] text-white"
+                          : "bg-gradient-to-r from-[#0A3D32] to-[#0F5D4E] text-white hover:from-[#0F5D4E] hover:to-[#0A3D32]"
                       }`}
                     >
                       {copied ? "Copied! ✓" : "Copy Link"}
@@ -768,7 +752,6 @@ const ClientDashboard = () => {
                   </div>
                 </div>
 
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <StatCard
                     title="Total Referrals"
@@ -788,18 +771,17 @@ const ClientDashboard = () => {
                   />
                 </div>
 
-                {/* Referral History */}
                 <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                   <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <Users className="w-6 h-6 mr-3 text-green-600" />
+                    <Users className="w-6 h-6 mr-3 text-[#0F5D4E]" />
                     People You've Referred
                   </h3>
 
                   {referrer && (
-                    <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div className="mb-6 p-4 bg-[#A8E6CF]/20 rounded-xl border border-[#A8E6CF]">
                       <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-blue-600" />
-                        <span className="text-blue-900 font-medium">
+                        <Shield className="w-5 h-5 text-[#0F5D4E]" />
+                        <span className="text-[#0A3D32] font-medium">
                           You were referred by: {referrer.full_name} ({referrer.email})
                         </span>
                       </div>
@@ -842,13 +824,13 @@ const ClientDashboard = () => {
                                 <span
                                   className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
                                     ref.status === "completed"
-                                      ? "bg-green-100 text-green-800 border border-green-200"
+                                      ? "bg-[#A8E6CF]/30 text-[#0A3D32] border border-[#A8E6CF]"
                                       : "bg-amber-100 text-amber-800 border border-amber-200"
                                   }`}
                                 >
                                   {ref.status || "pending"}
                                 </span>
-                                <span className="text-green-700 font-bold">
+                                <span className="text-[#0A3D32] font-bold">
                                   {ref.reward || 0} KES
                                 </span>
                               </div>
@@ -882,7 +864,6 @@ const ClientDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Profile Information */}
               <div className="bg-red-50 rounded-xl p-6 border border-red-200">
                 <h3 className="text-xl font-bold text-red-900 mb-4">Profile Information</h3>
                 <div className="space-y-3">
@@ -901,7 +882,6 @@ const ClientDashboard = () => {
                 </div>
               </div>
 
-              {/* Account Actions */}
               <div className="bg-red-50 rounded-xl p-6 border border-red-200">
                 <h3 className="text-xl font-bold text-red-900 mb-4">Account Actions</h3>
                 <div className="space-y-4">
@@ -914,7 +894,6 @@ const ClientDashboard = () => {
                   <button
                     onClick={() => {
                       if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                        // Add delete account functionality here
                         handleDeleteAccount();
                       }
                     }}
@@ -926,7 +905,6 @@ const ClientDashboard = () => {
               </div>
             </div>
 
-            {/* Danger Zone */}
             <div className="bg-red-100 rounded-xl p-6 border border-red-300">
               <h3 className="text-xl font-bold text-red-900 mb-4 flex items-center">
                 <Shield className="w-6 h-6 mr-2" />
@@ -950,8 +928,12 @@ const ClientDashboard = () => {
           </div>
         );
 
+
       case 'support':
         return <Contact isDashboard={true} />;
+
+      case 'history':
+        return <History />;
 
       default:
         return null;
@@ -959,18 +941,17 @@ const ClientDashboard = () => {
   };
 
   if (!profile) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-[#0F5D4E] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader className="w-12 h-12 animate-spin text-green-600" />
-        <p className="text-gray-600">Loading profile...</p>
+        <Loader className="w-12 h-12 animate-spin text-[#A8E6CF]" />
+        <p className="text-[#A8E6CF]">Loading profile...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-green-600 via-emerald-600 to-green-600/90 backdrop-blur-sm shadow-lg">
+    <div className="min-h-screen bg-[#0F5D4E]">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0A3D32] via-[#0F5D4E] to-[#0A3D32] backdrop-blur-sm shadow-lg">
         <div className="px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button 
@@ -985,11 +966,8 @@ const ClientDashboard = () => {
             <h1 className="text-xl md:text-2xl font-bold text-white">RentFlowCoin</h1>
           </div>
           <button
-            onClick={() => {
-              localStorage.clear();
-              window.location.href = '/login';
-            }}
-            className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-medium transition-all shadow-md"
+            onClick={() => setShowLogoutModal(true)}
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-medium transition-all shadow-md"
           >
             <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline">Logout</span>
@@ -998,12 +976,11 @@ const ClientDashboard = () => {
       </header>
 
       <div className="flex gap-6 p-4 md:p-6 max-w-[1600px] mx-auto">
-        {/* Floating Sidebar - Desktop */}
         <aside className={`hidden lg:block w-72 flex-shrink-0`}>
           <div className="sticky top-24 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E] flex items-center justify-center text-white font-bold text-lg">
                   {clientName ? clientName[0].toUpperCase() : 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1028,7 +1005,7 @@ const ClientDashboard = () => {
                       onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
                 activeTab === item.id
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#0A3D32] to-[#0F5D4E] text-white shadow-md'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               } group`}
                     >
@@ -1042,7 +1019,6 @@ const ClientDashboard = () => {
           </div>
         </aside>
 
-        {/* Mobile Sidebar */}
         {sidebarOpen && (
           <>
             <div 
@@ -1052,7 +1028,7 @@ const ClientDashboard = () => {
             <aside className="fixed left-4 top-20 bottom-4 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 lg:hidden overflow-hidden">
               <div className="p-6 h-full overflow-y-auto">
                 <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E] flex items-center justify-center text-white font-bold text-lg">
                     {clientName ? clientName[0].toUpperCase() : 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -1078,7 +1054,7 @@ const ClientDashboard = () => {
                         onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
                           activeTab === item.id 
-                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md' 
+                            ? 'bg-gradient-to-r from-[#0A3D32] to-[#0F5D4E] text-white shadow-md' 
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         } group`}
                       >
@@ -1093,7 +1069,6 @@ const ClientDashboard = () => {
           </>
         )}
 
-        {/* Main Content */}
         <main className="flex-1 min-w-0">
           {isMaintenance && (
             <div className="bg-red-500 text-white p-4 rounded-xl mb-6 text-center font-semibold shadow-lg">
@@ -1104,7 +1079,6 @@ const ClientDashboard = () => {
         </main>
       </div>
 
-      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-200 animate-in zoom-in-95 duration-300 relative">
@@ -1115,7 +1089,7 @@ const ClientDashboard = () => {
               <X className="w-5 h-5" />
             </button>
             <div className="mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E] flex items-center justify-center">
                 <span className="text-2xl font-bold text-white">{selectedCurrency?.code}</span>
               </div>
               <h3 className="text-2xl font-bold text-center text-gray-900 mb-2">
@@ -1123,10 +1097,10 @@ const ClientDashboard = () => {
               </h3>
             </div>
             <div className="space-y-6">
-              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                <div className="text-4xl font-bold text-green-600 mb-2">KES {selectedCurrency?.price}</div>
+              <div className="text-center p-6 bg-gradient-to-br from-[#A8E6CF]/30 to-[#A8E6CF]/50 rounded-xl border border-[#0F5D4E]">
+                <div className="text-4xl font-bold text-[#0F5D4E] mb-2">KES {selectedCurrency?.price}</div>
                 <div className="text-sm text-gray-600">
-                  Expected Return: <span className="text-emerald-600 font-semibold text-lg">KES {selectedCurrency?.price * 2}</span>
+                  Expected Return: <span className="text-[#0A3D32] font-semibold text-lg">KES {selectedCurrency?.price * 2}</span>
                 </div>
               </div>
               <div>
@@ -1136,7 +1110,7 @@ const ClientDashboard = () => {
                   placeholder="07XXXXXXXX"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  className="w-full px-4 py-3 border border-gray-300 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-4 py-3 border border-gray-300 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F5D4E] focus:border-transparent text-gray-900 placeholder:text-gray-400"
                 />
                 {phoneError && <p className="text-red-600 text-xs mt-2 flex items-center gap-1">
                   <span className="w-1 h-1 rounded-full bg-red-600"></span>
@@ -1145,8 +1119,8 @@ const ClientDashboard = () => {
                 <p className="text-xs text-gray-500 mt-2">Enter your 10-digit M-Pesa number</p>
               </div>
               {paymentStatus && (
-                <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
-                  {isLoading && <Loader className="inline-block animate-spin w-5 h-5 text-green-600 mr-2" />}
+                <div className="text-center p-4 bg-[#A8E6CF]/30 rounded-xl border border-[#A8E6CF]">
+                  {isLoading && <Loader className="inline-block animate-spin w-5 h-5 text-[#0F5D4E] mr-2" />}
                   <span className="text-sm text-gray-900 font-medium">{paymentStatus}</span>
                 </div>
               )}
@@ -1164,7 +1138,7 @@ const ClientDashboard = () => {
                 <button
                   onClick={handlePayment}
                   disabled={isLoading || !phoneNumber || phoneNumber.length !== 10}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
+                  className="flex-1 bg-gradient-to-r from-[#0A3D32] to-[#0F5D4E] text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
                 >
                   {isLoading ? 'Processing...' : 'Pay with M-Pesa'}
                 </button>
@@ -1180,24 +1154,23 @@ const ClientDashboard = () => {
         </div>
       )}
 
-      {/* PIN Modal */}
       {showPinModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-200 animate-in zoom-in-95 duration-300">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#0A3D32] to-[#0F5D4E] flex items-center justify-center">
                 <DollarSign className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Confirm Payment</h3>
             </div>
             <div className="space-y-6">
-              <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 text-center">
+              <div className="p-6 bg-gradient-to-br from-[#A8E6CF]/30 to-[#A8E6CF]/50 rounded-xl border border-[#0F5D4E] text-center">
                 <p className="text-gray-900 font-medium">Please enter your M-Pesa PIN on your phone when prompted.</p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={proceedPayment}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                  className="flex-1 bg-gradient-to-r from-[#0A3D32] to-[#0F5D4E] text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
                   OK, I'm Ready
                 </button>
@@ -1208,6 +1181,37 @@ const ClientDashboard = () => {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-200 animate-in zoom-in-95 duration-300">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+                <LogOut className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Confirm Logout</h3>
+              <p className="text-gray-600">Are you sure you want to log out of your account?</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.href = '/login';
+                }}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-semibold transition-all shadow-md"
+              >
+                Yes, Logout
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-6 py-3 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-all"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

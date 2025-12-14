@@ -5,6 +5,7 @@ import {
   CheckCircle, Eye, Filter, MoreHorizontal, DollarSign, Clock, XCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { API_BASE_URL } from '../../lib/api';
 import Contact from '../../components/Contact';
 
@@ -153,24 +154,31 @@ const AdminDashboard = () => {
   const [kycLoading, setKycLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [withdrawalsViewMode, setWithdrawalsViewMode] = useState('list'); // 'list' or 'detail'
+  const [revealedReferrers, setRevealedReferrers] = useState(new Set());
+  const [userProfileModal, setUserProfileModal] = useState(false);
+  const [selectedReferrer, setSelectedReferrer] = useState(null);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [systemStatus, setSystemStatus] = useState('online');
   const [settingsLoading, setSettingsLoading] = useState(false);
+
   const [rentals, setRentals] = useState([]);
+  const [activeRentals, setActiveRentals] = useState([]);
+  const [activeRentalsSummary, setActiveRentalsSummary] = useState({});
   const [transactions, setTransactions] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+
+
   const [menuItems, setMenuItems] = useState([
-    { id: 'overview', label: 'Overview', icon: BarChart3, count: null },
-    { id: 'users', label: 'Users', icon: Users, count: users.length },
-    { id: 'withdrawals', label: 'Withdrawals', icon: DollarSign, count: withdrawals.filter(w => w.status === 'pending').length },
-    { id: 'referrals', label: 'Referrals', icon: CheckCircle, count: referrals.length },
-    { id: 'rentals', label: 'Rentals', icon: Home, count: 0 },
-    { id: 'transactions', label: 'Transactions', icon: CreditCard, count: 0 },
-    { id: 'kyc', label: 'KYC Verifications', icon: FileCheck, count: 12 },
-    { id: 'support', label: 'Support', icon: MessageSquare, count: 7 },
-    { id: 'settings', label: 'Settings', icon: Settings, count: null },
-    { id: 'audit', label: 'Audit Logs', icon: Shield, count: 0 }
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'withdrawals', label: 'Withdrawals', icon: DollarSign },
+    { id: 'referrals', label: 'Referrals', icon: CheckCircle },
+    { id: 'rentals', label: 'Rentals', icon: Home },
+    { id: 'kyc', label: 'KYC Verifications', icon: FileCheck },
+    { id: 'support', label: 'Support', icon: MessageSquare },
+    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'audit', label: 'Audit Logs', icon: Shield }
   ]);
 
   // API and handler functions
@@ -414,6 +422,12 @@ const AdminDashboard = () => {
 
   const handleWithdrawalAction = async (withdrawalId, action) => {
     if (!confirm(`Are you sure you want to ${action} this withdrawal?`)) return;
+    const token = localStorage.getItem('access');
+    if (!token) {
+      alert("Session expired. Please login again.");
+      window.location.href = '/login';
+      return;
+    }
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE_URL}/api/withdraw/${action}/${withdrawalId}/`, {
@@ -517,8 +531,40 @@ const AdminDashboard = () => {
     }
   };
 
+
+  // Fetch active rentals for admin monitoring
+  const fetchActiveRentals = async () => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      console.error('Error fetching active rentals: token is not defined');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/rentals/admin/active/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setActiveRentals(data.active_rentals || []);
+        setActiveRentalsSummary(data.summary || {});
+      } else if (res.status === 403) {
+        console.error('Access denied: Admin privileges required');
+      }
+    } catch (error) {
+      console.error('Error fetching active rentals:', error);
+    }
+  };
+
   // Fetch settings
   const fetchSettings = async () => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      console.error('Error fetching settings: token is not defined');
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/api/support/settings/`, {
         headers: {
@@ -568,12 +614,14 @@ const AdminDashboard = () => {
     }
   };
 
+
   useEffect(() => {
     const initializeData = async () => {
       await fetchUsers();
       await fetchWithdrawals();
       fetchReferrals();
       fetchKycForms();
+      fetchActiveRentals();
       fetchSettings();
     };
     initializeData();
@@ -586,76 +634,144 @@ const AdminDashboard = () => {
       setFilterStatus('all');
     }
   }, [activeSection]);
+
   // Referrals Management Section
-  const ReferralsManagement = () => (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h2 className="text-xl font-bold text-green-700 mb-4">All Referral Records</h2>
-        {/* Mobile Card Layout */}
-        <div className="block md:hidden space-y-4">
-          {referrals.length === 0 && (
-            <div className="text-center py-8 text-green-600">No referral records found</div>
-          )}
-          {referrals.map((ref, idx) => (
-            <div key={idx} className="bg-green-50 rounded-lg p-4 border border-green-200">
-              <div className="space-y-2">
-                <div>
-                  <span className="text-green-500 text-xs">Referrer</span>
-                  <div className="text-green-900 font-medium">{ref.referrer_email || ref.referrer_full_name || 'Unknown'}</div>
-                </div>
-                <div>
-                  <span className="text-green-500 text-xs">Referred User</span>
-                  <div className="text-green-900">{ref.referred_email || ref.referred_full_name || 'Unknown'}</div>
-                </div>
-                <div>
-                  <span className="text-green-500 text-xs">Date</span>
-                  <div className="text-green-900">{ref.created_at ? new Date(ref.created_at).toLocaleDateString() : '-'}</div>
-                </div>
-                <div>
-                  <span className="text-green-500 text-xs">Status</span>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    ref.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {ref.completed ? 'Completed' : 'Pending'}
-                  </span>
-                </div>
-              </div>
+  const ReferralsManagement = () => {
+    // Group referrals by referrer
+    const groupedReferrals = referrals.reduce((acc, ref) => {
+      const referrerKey = ref.referrer_email || ref.referrer_full_name || ref.referrer_id || 'unknown';
+      if (!acc[referrerKey]) {
+        acc[referrerKey] = {
+          referrer: ref.referrer_email || ref.referrer_full_name || ref.referrer_id || 'Unknown',
+          referrerEmail: ref.referrer_email,
+          referrals: []
+        };
+      }
+      acc[referrerKey].referrals.push(ref);
+      return acc;
+    }, {});
+
+    // Convert to array for rendering
+    const referrerGroups = Object.values(groupedReferrals);
+
+    // Filter groups based on search term
+    const filteredGroups = referrerGroups.filter(group =>
+      group.referrer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.referrals.some(ref =>
+        (ref.referred_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (ref.referred_full_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    const showReferrerDetails = (group) => {
+      setSelectedReferrer(group);
+    };
+
+    const showUserProfile = (user) => {
+      setSelectedUser(user);
+      setUserProfileModal(true);
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-[#0F5D4E]">Referrals by Referrer</h2>
+            <div className="relative flex-1 max-w-md">
+              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search referrers or referred users..."
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                disabled={loading}
+              />
             </div>
-          ))}
-        </div>
-        {/* Desktop Table Layout */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-green-50 border-b border-green-200">
-              <tr>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Referrer</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Referred User</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Date</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-green-200">
-              {referrals.length === 0 && (
-                <tr><td colSpan={4} className="text-center py-8 text-green-600">No referral records found</td></tr>
-              )}
-              {referrals.map((ref, idx) => (
-                <tr key={idx} className="hover:bg-green-50 transition-colors">
-                  <td className="py-4 px-6">{ref.referrer_email || ref.referrer_full_name || 'Unknown'}</td>
-                  <td className="py-4 px-6">{ref.referred_email || ref.referred_full_name || 'Unknown'}</td>
-                  <td className="py-4 px-6">{ref.created_at ? new Date(ref.created_at).toLocaleDateString() : '-'}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${ref.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                      {ref.completed ? 'Completed' : 'Pending'}
-                    </span>
-                  </td>
+          </div>
+
+          {/* Mobile Card Layout */}
+          <div className="block md:hidden space-y-4">
+            {filteredGroups.length === 0 && (
+              <div className="text-center py-8 text-[#0F5D4E]">No referral records found</div>
+            )}
+            {filteredGroups.map((group, idx) => {
+              const referrerUser = users.find(u => u.email === group.referrerEmail);
+              return (
+                <div key={idx} className="bg-[#0F5D4E]/10 rounded-lg p-4 border border-[#0F5D4E]/20">
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[#0F5D4E] text-xs">Referrer</span>
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => showReferrerDetails(group)}
+                          className="text-[#0A3D32] font-bold text-lg underline hover:text-[#0F5D4E] transition-colors"
+                        >
+                          {group.referrerEmail || group.referrer} ({group.referrals.length} referrals)
+                        </button>
+                        {referrerUser && (
+                          <button
+                            onClick={() => handleAwardWallet(referrerUser.id)}
+                            disabled={loading}
+                            className="px-3 py-1 text-xs font-medium rounded-md bg-[#0F5D4E] text-white hover:bg-[#0A3D32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Award 50
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#0F5D4E]/10 border-b border-[#0F5D4E]/20">
+                <tr>
+                  <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Referrer</th>
+                  <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#0F5D4E]/20">
+                {filteredGroups.length === 0 && (
+                  <tr><td colSpan={2} className="text-center py-8 text-[#0F5D4E]">No referral records found</td></tr>
+                )}
+                {filteredGroups.map((group, idx) => {
+                  const referrerUser = users.find(u => u.email === group.referrerEmail);
+                  return (
+                    <tr key={idx} className="hover:bg-[#0F5D4E]/5 transition-colors">
+                      <td className="py-4 px-6">
+                        <button
+                          onClick={() => showReferrerDetails(group)}
+                          className="font-medium text-[#0A3D32] underline hover:text-[#0F5D4E] transition-colors"
+                        >
+                          {group.referrerEmail || group.referrer} ({group.referrals.length} referrals)
+                        </button>
+                      </td>
+                      <td className="py-4 px-6">
+                        {referrerUser && (
+                          <button
+                            onClick={() => handleAwardWallet(referrerUser.id)}
+                            disabled={loading}
+                            className="px-3 py-1 text-xs font-medium rounded-md bg-[#0F5D4E] text-white hover:bg-[#0A3D32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Award 50
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   useEffect(() => {
     let filtered = activeSection === 'withdrawals' ? withdrawals : users;
@@ -755,35 +871,36 @@ const AdminDashboard = () => {
           </div>
 
           <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden relative">
+
             {loading && (
               <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F5D4E]"></div>
               </div>
             )}
             <div className="overflow-x-auto">
               {/* Mobile Card Layout */}
               <div className="block md:hidden space-y-4">
                 {filteredUsersWithWithdrawals.length === 0 && !loading && (
-                  <div className="text-center py-8 text-green-600">No users with withdrawals found</div>
+                  <div className="text-center py-8 text-[#0F5D4E]">No users with withdrawals found</div>
                 )}
                 {filteredUsersWithWithdrawals.map(user => (
-                  <div key={user.id} className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <div key={user.id} className="bg-[#0F5D4E]/10 rounded-lg p-4 border border-[#0F5D4E]/20">
                     <div className="space-y-2">
                       <div>
-                        <span className="text-green-500 text-xs">Email</span>
-                        <div className="text-green-900 font-medium">{user.email}</div>
+                        <span className="text-[#0F5D4E] text-xs">Email</span>
+                        <div className="text-[#0A3D32] font-medium">{user.email}</div>
                       </div>
                       <div>
-                        <span className="text-green-500 text-xs">Phone</span>
-                        <div className="text-green-900">{user.phone}</div>
+                        <span className="text-[#0F5D4E] text-xs">Phone</span>
+                        <div className="text-[#0A3D32]">{user.phone}</div>
                       </div>
                       <div>
-                        <span className="text-green-500 text-xs">Withdrawals</span>
-                        <div className="text-green-900">{user.withdrawals.length}</div>
+                        <span className="text-[#0F5D4E] text-xs">Withdrawals</span>
+                        <div className="text-[#0A3D32]">{user.withdrawals.length}</div>
                       </div>
                       <button
                         onClick={() => handleSelectUser(user)}
-                        className="text-green-600 hover:text-green-800 text-sm font-medium underline"
+                        className="text-[#0F5D4E] hover:text-[#0A3D32] text-sm font-medium underline"
                       >
                         View Withdrawals →
                       </button>
@@ -793,26 +910,26 @@ const AdminDashboard = () => {
               </div>
               {/* Desktop Table Layout */}
               <table className="w-full hidden md:table">
-                <thead className="bg-green-50 border-b border-green-200">
+                <thead className="bg-[#0F5D4E]/10 border-b border-[#0F5D4E]/20">
                   <tr>
-                    <th className="text-left py-4 px-6 font-medium text-green-900">Email</th>
-                    <th className="text-left py-4 px-6 font-medium text-green-900">Phone Number</th>
-                    <th className="text-left py-4 px-6 font-medium text-green-900">Number of Withdrawals</th>
-                    <th className="text-left py-4 px-6 font-medium text-green-900">Actions</th>
+                    <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Email</th>
+                    <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Phone Number</th>
+                    <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Number of Withdrawals</th>
+                    <th className="text-left py-4 px-6 font-medium text-[#0A3D32]">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-green-200">
+                <tbody className="divide-y divide-[#0F5D4E]/20">
                   {filteredUsersWithWithdrawals.length === 0 && !loading ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-green-600">No users with withdrawals found</td>
+                      <td colSpan={4} className="text-center py-8 text-[#0F5D4E]">No users with withdrawals found</td>
                     </tr>
                   ) : (
                     filteredUsersWithWithdrawals.map(user => (
-                      <tr key={user.id} className="hover:bg-green-50 cursor-pointer" onClick={() => handleSelectUser(user)}>
-                        <td className="py-4 px-6 text-green-900">{user.email}</td>
-                        <td className="py-4 px-6 text-green-900">{user.phone}</td>
-                        <td className="py-4 px-6 text-green-900">{user.withdrawals.length}</td>
-                        <td className="py-4 px-6 text-green-900 text-sm font-medium text-green-600 underline">View Withdrawals</td>
+                      <tr key={user.id} className="hover:bg-[#0F5D4E]/5 cursor-pointer" onClick={() => handleSelectUser(user)}>
+                        <td className="py-4 px-6 text-[#0A3D32]">{user.email}</td>
+                        <td className="py-4 px-6 text-[#0A3D32]">{user.phone}</td>
+                        <td className="py-4 px-6 text-[#0A3D32]">{user.withdrawals.length}</td>
+                        <td className="py-4 px-6 text-[#0A3D32] text-sm font-medium text-[#0F5D4E] underline">View Withdrawals</td>
                       </tr>
                     ))
                   )}
@@ -901,27 +1018,14 @@ const AdminDashboard = () => {
                         </div>
                       )}
                     </div>
+
                     {withdrawal.status === 'pending' && (
-                      <div className="mt-4 pt-4 border-t border-green-100">
+                      <div className="mt-4 pt-4 border-t border-[#0F5D4E]/20">
                         <div className="flex flex-col sm:flex-row gap-2">
-                          <button
-                            onClick={() => handleWithdrawalAction(withdrawal.id, 'approve')}
-                            disabled={loading}
-                            className="flex-1 px-4 py-3 text-sm font-medium rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleWithdrawalAction(withdrawal.id, 'reject')}
-                            disabled={loading}
-                            className="flex-1 px-4 py-3 text-sm font-medium rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                          >
-                            Reject
-                          </button>
                           <button
                             onClick={() => handleWithdrawalAction(withdrawal.id, 'paid')}
                             disabled={loading}
-                            className="flex-1 px-4 py-3 text-sm font-medium rounded-md bg-green-700 text-white hover:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                            className="flex-1 px-4 py-3 text-sm font-medium rounded-md bg-[#0F5D4E] text-white hover:bg-[#0A3D32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                           >
                             Mark as Paid
                           </button>
@@ -1043,13 +1147,15 @@ const AdminDashboard = () => {
                     >
                       {user.is_active ? 'Block' : 'Unblock'}
                     </button>
-                    <button 
-                      className="px-3 py-2 text-xs text-green-600 hover:text-green-800 rounded-md disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                      disabled={loading}
-                      onClick={() => handleAwardWallet(user.id)}
-                    >
-                      Award 50 + KYC
-                    </button>
+                      <button
+                        onClick={() => handleBlockUser(user.id, user.is_active)}
+                        disabled={loading}
+                        className={`px-3 py-2 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[36px] ${
+                          user.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'
+                        }`}
+                      >
+                        {user.is_active ? 'Block' : 'Unblock'}
+                      </button>
                     <button 
                       className="px-3 py-2 text-xs text-green-600 hover:text-green-800 rounded-md disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
                       disabled={loading}
@@ -1072,24 +1178,24 @@ const AdminDashboard = () => {
             ))}
           </div>
           {/* Desktop Table Layout */}
-          <table className="w-full hidden md:table">
+          <table className="w-full hidden md:table table-fixed">
             <thead className="bg-green-50 border-b border-green-200">
               <tr>
-                <th className="text-left py-4 px-6 font-medium text-green-900">User</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Email</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Wallet</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Status</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Joined</th>
-                <th className="text-left py-4 px-6 font-medium text-green-900">Actions</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/4">User</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/4">Email</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/6">Wallet</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/6">Status</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/6">Joined</th>
+                <th className="text-left py-2 px-3 font-medium text-green-900 w-1/6">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-green-200">
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-green-50 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">
+                  <td className="py-2 px-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-xs">
                           {(
                             user.first_name?.[0] ||
                             user.last_name?.[0] ||
@@ -1098,8 +1204,8 @@ const AdminDashboard = () => {
                           ).toUpperCase()}
                         </span>
                       </div>
-                      <div>
-                        <p className="font-medium text-green-900">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-green-900 text-sm truncate">
                           {user.first_name && user.last_name
                             ? `${user.first_name} ${user.last_name}`
                             : user.first_name
@@ -1110,53 +1216,46 @@ const AdminDashboard = () => {
                                   ? user.username
                                   : 'Unknown User'}
                         </p>
-                        <p className="text-sm text-green-700">@{user.username || 'unknown'}</p>
+                        <p className="text-xs text-green-700 truncate">@{user.username || 'unknown'}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-green-900">{user.email}</td>
-                  <td className="py-4 px-6 text-green-900 font-bold">Ksh {user.wallet_balance}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  <td className="py-2 px-3 text-green-900 text-sm truncate">{user.email}</td>
+                  <td className="py-2 px-3 text-green-900 font-bold text-sm">Ksh {user.wallet_balance}</td>
+                  <td className="py-2 px-3">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
-                      {user.is_active ? <><CheckCircle size={12} className="mr-1" />Active</> : <><UserX size={12} className="mr-1" />Blocked</>}
+                      {user.is_active ? 'Active' : 'Blocked'}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-green-700">{new Date(user.date_joined).toLocaleDateString()}</td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center space-x-2">
+                  <td className="py-2 px-3 text-green-700 text-sm">{new Date(user.date_joined).toLocaleDateString()}</td>
+                  <td className="py-2 px-3">
+                    <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleBlockUser(user.id, user.is_active)}
                         disabled={loading}
-                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`px-2 py-1 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                           user.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'
                         }`}
                       >
                         {user.is_active ? 'Block' : 'Unblock'}
                       </button>
-                      <button 
-                        className="p-2 text-green-400 hover:text-green-600 rounded-md disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                        disabled={loading}
-                        onClick={() => handleAwardWallet(user.id)}
-                      >
-                        Award 50 + KYC
-                      </button>
-                      <button 
-                        className="p-2 text-green-400 hover:text-green-600 rounded-md disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      <button
+                        className="p-1 text-green-400 hover:text-green-600 rounded-md disabled:opacity-50 min-h-[32px] min-w-[32px] flex items-center justify-center"
                         disabled={loading}
                       >
-                        <Eye size={16} />
+                        <Eye size={14} />
                       </button>
-                      <button 
-                        className="p-2 text-green-400 hover:text-green-600 rounded-md disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      <button
+                        className="p-1 text-green-400 hover:text-green-600 rounded-md disabled:opacity-50 min-h-[32px] min-w-[32px] flex items-center justify-center"
                         disabled={loading}
                         onClick={() => {
                           setSelectedUser(user);
                           // Add user detail view logic here
                         }}
                       >
-                        <MoreHorizontal size={16} />
+                        <MoreHorizontal size={14} />
                       </button>
                     </div>
                   </td>
@@ -1176,6 +1275,7 @@ const AdminDashboard = () => {
         </div>
       </div>
     );
+
 
   // KYC Management Section
   const KycManagement = () => (
@@ -1243,6 +1343,193 @@ const AdminDashboard = () => {
           ))}
         </div>
       )}
+    </div>
+  );
+
+  // Rentals Management Section
+  const RentalsManagement = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-green-700 mb-2">Active Rentals</h2>
+          <p className="text-green-600">Monitor all active rental investments</p>
+        </div>
+        <button
+          onClick={fetchActiveRentals}
+          disabled={loading}
+          className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Refresh Data
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Active Rentals</p>
+              <p className="text-2xl font-bold text-green-700">{activeRentalsSummary.total_active_rentals || 0}</p>
+            </div>
+            <Home size={24} className="text-green-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Locked Amount</p>
+              <p className="text-2xl font-bold text-green-700">Ksh {activeRentalsSummary.total_locked_amount?.toFixed(2) || '0.00'}</p>
+            </div>
+            <DollarSign size={24} className="text-green-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Expected Returns</p>
+              <p className="text-2xl font-bold text-green-700">Ksh {activeRentalsSummary.total_expected_returns?.toFixed(2) || '0.00'}</p>
+            </div>
+            <BarChart3 size={24} className="text-green-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Mature Rentals</p>
+              <p className="text-2xl font-bold text-red-600">{activeRentalsSummary.total_mature_rentals || 0}</p>
+            </div>
+            <Clock size={24} className="text-red-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Active Rentals List */}
+      <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          </div>
+        )}
+        
+        <div className="overflow-x-auto">
+          {/* Mobile Card Layout */}
+          <div className="block md:hidden space-y-4">
+            {activeRentals.length === 0 && !loading && (
+              <div className="text-center py-8 text-green-600">No active rentals found</div>
+            )}
+            {activeRentals.map(rental => (
+              <div key={rental.id} className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {rental.user_email?.[0]?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-green-900">{rental.user_full_name}</p>
+                      <p className="text-sm text-green-700">{rental.user_email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-green-500 text-xs">Amount</span>
+                      <div className="text-green-900 font-bold">Ksh {rental.amount}</div>
+                    </div>
+                    <div>
+                      <span className="text-green-500 text-xs">Expected Return</span>
+                      <div className="text-green-900 font-bold">Ksh {rental.expected_return}</div>
+                    </div>
+                    <div>
+                      <span className="text-green-500 text-xs">Duration</span>
+                      <div className="text-green-900">{rental.duration_days} days</div>
+                    </div>
+                    <div>
+                      <span className="text-green-500 text-xs">Time Remaining</span>
+                      <div className={`font-bold ${rental.is_mature ? 'text-red-600' : 'text-green-900'}`}>
+                        {rental.is_mature ? 'Mature' : rental.time_remaining || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pt-2 border-t border-green-200">
+                    <span className="text-xs text-green-700">
+                      Started: {new Date(rental.created_at).toLocaleDateString()}
+                    </span>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      rental.is_mature ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                    }`}>
+                      {rental.is_mature ? 'Ready to Complete' : 'Active'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Desktop Table Layout */}
+          <table className="w-full hidden md:table">
+            <thead className="bg-green-50 border-b border-green-200">
+              <tr>
+                <th className="text-left py-3 px-4 font-medium text-green-900">User</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Amount</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Expected Return</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Duration</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Time Remaining</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-green-900">Started</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-green-200">
+              {activeRentals.length === 0 && !loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-green-600">No active rentals found</td>
+                </tr>
+              ) : (
+                activeRentals.map(rental => (
+                  <tr key={rental.id} className="hover:bg-green-50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-xs">
+                            {rental.user_email?.[0]?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-green-900 text-sm">{rental.user_full_name}</p>
+                          <p className="text-xs text-green-700">{rental.user_email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-green-900 font-bold">Ksh {rental.amount}</td>
+                    <td className="py-3 px-4 text-green-900 font-bold">Ksh {rental.expected_return}</td>
+                    <td className="py-3 px-4 text-green-900">{rental.duration_days} days</td>
+                    <td className="py-3 px-4">
+                      <span className={`font-medium ${rental.is_mature ? 'text-red-600' : 'text-green-900'}`}>
+                        {rental.is_mature ? 'Mature' : rental.time_remaining || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        rental.is_mature ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {rental.is_mature ? 'Ready to Complete' : 'Active'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-green-700 text-sm">
+                      {new Date(rental.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 
@@ -1349,8 +1636,9 @@ const AdminDashboard = () => {
     </div>
   );
 
+
   return (
-    <div className="min-h-screen bg-green-600/60 flex relative">
+    <div className="min-h-screen bg-[#0F5D4E] flex relative">
       <Particles />
       <Waves />
       {/* Sidebar Overlay */}
@@ -1361,16 +1649,19 @@ const AdminDashboard = () => {
         />
       )}
       {/* Sidebar */}
-      <aside className={`bg-green-900 shadow-lg w-64 min-h-screen p-4 md:p-6 transition-all duration-300 fixed md:relative z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+
+      <aside className={`bg-[#0A3D32] shadow-lg w-64 min-h-screen p-4 md:p-6 transition-all duration-300 fixed md:relative z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex items-center justify-between mb-8">
           <span className="text-2xl font-bold text-white">Admin</span>
-          <button className="md:hidden text-white hover:text-green-200" onClick={() => setSidebarOpen(false)}><X size={24} /></button>
+
+          <button className="md:hidden text-white hover:text-[#A8E6CF]" onClick={() => setSidebarOpen(false)}><X size={24} /></button>
         </div>
         <nav className="space-y-2">
+
           {menuItems.map(item => (
             <button
               key={item.id}
-              className={`w-full flex items-center px-4 py-3 rounded-lg text-white hover:bg-green-700 transition-colors font-medium ${activeSection === item.id ? 'bg-green-800' : ''}`}
+              className={`w-full flex items-center px-4 py-3 rounded-lg text-white hover:bg-[#0F5D4E] transition-colors font-medium ${activeSection === item.id ? 'bg-[#0F5D4E]' : ''}`}
               onClick={() => {
                 setActiveSection(item.id);
                 setSidebarOpen(false);
@@ -1378,7 +1669,6 @@ const AdminDashboard = () => {
             >
               <item.icon size={20} className="mr-3" />
               {item.label}
-              {item.count !== null && <span className="ml-auto text-xs bg-green-600 text-white rounded-full px-2 py-0.5">{item.count}</span>}
             </button>
           ))}
         </nav>
@@ -1389,119 +1679,295 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            <button className="md:hidden text-green-700 hover:text-green-900 mr-4" onClick={() => setSidebarOpen(true)}>
+
+            <button className="md:hidden text-white hover:text-[#A8E6CF] mr-4" onClick={() => setSidebarOpen(true)}>
               <Menu size={24} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-green-700">Admin Dashboard</h1>
-              <p className="text-green-600">Welcome, {adminData.username}</p>
+              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+              <p className="text-[#A8E6CF]">Welcome, {adminData.username}</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium" onClick={handleLogout}><LogOut size={18} className="inline mr-2" />Logout</button>
+
+            <button className="bg-[#0F5D4E] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#0A3D32]" onClick={handleLogout}><LogOut size={18} className="inline mr-2" />Logout</button>
           </div>
         </div>
 
         {/* Section Content */}
+
         {activeSection === 'overview' && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-              {stats.map((stat, idx) => (
-                <div key={idx} className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-green-200 flex flex-col items-start">
-                  <span className="text-green-500 text-xs font-medium mb-2">{stat.title}</span>
-                  <span className="text-xl md:text-2xl font-bold text-green-900">{stat.value}</span>
-                  <span className={`mt-2 text-sm font-medium ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</span>
+            {/* Stats Overview with Pie Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+              {/* Users Stats Pie Chart */}
+              <div className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-gray-200">
+                <h3 className="text-lg font-bold text-[#0F5D4E] mb-4 text-center">Users Overview</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Active Users', value: parseInt(stats.find(s => s.title === 'Total Users')?.value || '0'), fill: '#0F5D4E' },
+                        { name: 'Pending KYC', value: parseInt(stats.find(s => s.title === 'Pending KYC')?.value || '0'), fill: '#A8E6CF' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      <Cell fill="#0F5D4E" />
+                      <Cell fill="#A8E6CF" />
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="text-center mt-2">
+                  <p className="text-sm text-[#0F5D4E]">Total: {stats.find(s => s.title === 'Total Users')?.value || '0'}</p>
+                </div>
+              </div>
+
+              {/* Withdrawals Stats Pie Chart */}
+              <div className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-gray-200">
+                <h3 className="text-lg font-bold text-[#0F5D4E] mb-4 text-center">Withdrawals Overview</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Pending', value: parseInt(stats.find(s => s.title === 'Pending Withdrawals')?.value || '0'), fill: '#FFD700' },
+                        { name: 'Total', value: parseInt(stats.find(s => s.title === 'Total Withdrawals')?.value || '0'), fill: '#FF6B6B' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      <Cell fill="#FFD700" />
+                      <Cell fill="#FF6B6B" />
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="text-center mt-2">
+                  <p className="text-sm text-[#0F5D4E]">Pending: {stats.find(s => s.title === 'Pending Withdrawals')?.value || '0'}</p>
+                </div>
+              </div>
+
+              {/* Financial Stats Pie Chart */}
+              <div className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-gray-200">
+                <h3 className="text-lg font-bold text-[#0F5D4E] mb-4 text-center">Financial Overview</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Wallet Balance', value: parseFloat(stats.find(s => s.title === 'Total Wallet Balance')?.value?.replace(/[^\d.-]/g, '') || '0'), fill: '#4ECDC4' },
+                        { name: 'Revenue', value: parseFloat(stats.find(s => s.title === 'Monthly Revenue')?.value?.replace(/[^\d.-]/g, '') || '0'), fill: '#45B7D1' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      <Cell fill="#4ECDC4" />
+                      <Cell fill="#45B7D1" />
+                    </Pie>
+                    <Tooltip formatter={(value) => [`Ksh ${value}`, '']} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="text-center mt-2">
+                  <p className="text-sm text-[#0F5D4E]">Balance: {stats.find(s => s.title === 'Total Wallet Balance')?.value || 'Ksh 0'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Cards for Mobile Visibility */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 md:mb-8">
+              {stats.map((stat, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-md p-4 border border-gray-200 text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#0F5D4E]">{stat.value}</div>
+                  <div className="text-sm text-[#0F5D4E] mt-1">{stat.title}</div>
+                  <div className={`text-xs mt-1 ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Pending Withdrawals Section */}
-            <div className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-gray-200 mb-6 md:mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-                <h2 className="text-lg md:text-xl font-bold text-green-700">Pending Withdrawals</h2>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-md p-4 md:p-6 border border-gray-200">
+              <h2 className="text-lg md:text-xl font-bold text-[#0F5D4E] mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button
+                  onClick={() => setActiveSection('users')}
+                  className="flex flex-col items-center p-4 bg-[#0F5D4E]/10 rounded-lg hover:bg-[#0F5D4E]/20 transition-colors"
+                >
+                  <Users size={24} className="text-[#0F5D4E] mb-2" />
+                  <span className="text-sm font-medium text-[#0F5D4E]">Users</span>
+                </button>
                 <button
                   onClick={() => setActiveSection('withdrawals')}
-                  className="text-green-600 hover:text-green-800 text-sm font-medium self-start sm:self-auto"
+                  className="flex flex-col items-center p-4 bg-[#0F5D4E]/10 rounded-lg hover:bg-[#0F5D4E]/20 transition-colors"
                 >
-                  View All
+                  <DollarSign size={24} className="text-[#0F5D4E] mb-2" />
+                  <span className="text-sm font-medium text-[#0F5D4E]">Withdrawals</span>
                 </button>
-              </div>
-              {/* Mobile Card Layout */}
-              <div className="block md:hidden space-y-4">
-                {withdrawals.filter(w => w.status === 'pending').slice(0, 5).map((withdrawal) => (
-                  <div key={withdrawal.id} className="bg-green-50 rounded-lg p-4 border border-green-200">
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-green-500 text-xs">Email</span>
-                        <div className="text-green-900 font-medium">{withdrawal.user_email || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span className="text-green-500 text-xs">Phone Number</span>
-                        <div className="text-green-900">{withdrawal.user_phone_number || withdrawal.mobile_number || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span className="text-green-500 text-xs">Amount</span>
-                        <div className="text-green-900 font-bold text-lg">Ksh {withdrawal.amount}</div>
-                      </div>
-                      <button
-                        onClick={() => handleWithdrawalAction(withdrawal.id, 'paid')}
-                        disabled={loading}
-                        className="w-full px-4 py-3 text-sm font-medium rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                      >
-                        Mark as Paid
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {withdrawals.filter(w => w.status === 'pending').length === 0 && (
-                  <div className="text-center py-8 text-green-600">No pending withdrawals</div>
-                )}
-              </div>
-              {/* Desktop Table Layout */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-green-50 border-b border-green-200">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-medium text-green-900">Email</th>
-                      <th className="text-left py-3 px-4 font-medium text-green-900">Phone Number</th>
-                      <th className="text-left py-3 px-4 font-medium text-green-900">Amount</th>
-                      <th className="text-left py-3 px-4 font-medium text-green-900">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-green-200">
-                    {withdrawals.filter(w => w.status === 'pending').slice(0, 5).map((withdrawal) => (
-                      <tr key={withdrawal.id} className="hover:bg-green-50">
-                        <td className="py-3 px-4 text-green-900">{withdrawal.user_email || 'N/A'}</td>
-                        <td className="py-3 px-4 text-green-900">{withdrawal.user_phone_number || withdrawal.mobile_number || 'N/A'}</td>
-                        <td className="py-3 px-4 text-green-900 font-bold">Ksh {withdrawal.amount}</td>
-                        <td className="py-3 px-4">
-                          <button
-                            onClick={() => handleWithdrawalAction(withdrawal.id, 'paid')}
-                            disabled={loading}
-                            className="px-3 py-1 text-xs font-medium rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Paid
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {withdrawals.filter(w => w.status === 'pending').length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="text-center py-8 text-green-600">No pending withdrawals</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <button
+                  onClick={() => setActiveSection('kyc')}
+                  className="flex flex-col items-center p-4 bg-[#0F5D4E]/10 rounded-lg hover:bg-[#0F5D4E]/20 transition-colors"
+                >
+                  <FileCheck size={24} className="text-[#0F5D4E] mb-2" />
+                  <span className="text-sm font-medium text-[#0F5D4E]">KYC</span>
+                </button>
+                <button
+                  onClick={() => setActiveSection('referrals')}
+                  className="flex flex-col items-center p-4 bg-[#0F5D4E]/10 rounded-lg hover:bg-[#0F5D4E]/20 transition-colors"
+                >
+                  <CheckCircle size={24} className="text-[#0F5D4E] mb-2" />
+                  <span className="text-sm font-medium text-[#0F5D4E]">Referrals</span>
+                </button>
               </div>
             </div>
           </>
         )}
+
         {activeSection === 'users' && <UsersManagement />}
         {activeSection === 'withdrawals' && <WithdrawalsManagement />}
+        {activeSection === 'rentals' && <RentalsManagement />}
         {activeSection === 'referrals' && <ReferralsManagement />}
         {activeSection === 'kyc' && <KycManagement />}
         {activeSection === 'settings' && <SettingsManagement />}
         {activeSection === 'support' && <Contact isAdmin={true} />}
+
+        {/* User Profile Modal */}
+        {userProfileModal && selectedUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-[#0F5D4E]">User Profile</h3>
+                  <button
+                    onClick={() => setUserProfileModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-[#0F5D4E] to-[#0A3D32] rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-xl">
+                        {(selectedUser.first_name?.[0] || selectedUser.last_name?.[0] || selectedUser.username?.[0] || 'U').toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-[#0A3D32]">
+                        {selectedUser.first_name && selectedUser.last_name
+                          ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                          : selectedUser.first_name || selectedUser.last_name || selectedUser.username || 'Unknown User'}
+                      </h4>
+                      <p className="text-[#0F5D4E]">@{selectedUser.username || 'unknown'}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-[#0F5D4E]/5 rounded-lg p-4">
+                      <span className="text-[#0F5D4E] text-xs font-medium">Email</span>
+                      <div className="text-[#0A3D32] font-medium">{selectedUser.email}</div>
+                    </div>
+
+                    <div className="bg-[#0F5D4E]/5 rounded-lg p-4">
+                      <span className="text-[#0F5D4E] text-xs font-medium">Phone Number</span>
+                      <div className="text-[#0A3D32] font-medium">{selectedUser.phone_number || 'Not provided'}</div>
+                    </div>
+
+                    <div className="bg-[#0F5D4E]/5 rounded-lg p-4">
+                      <span className="text-[#0F5D4E] text-xs font-medium">Wallet Balance</span>
+                      <div className="text-[#0A3D32] font-bold text-lg">Ksh {selectedUser.wallet_balance || '0'}</div>
+                    </div>
+
+                    <div className="bg-[#0F5D4E]/5 rounded-lg p-4">
+                      <span className="text-[#0F5D4E] text-xs font-medium">Status</span>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                        selectedUser.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedUser.is_active ? 'Active' : 'Blocked'}
+                      </span>
+                    </div>
+
+                    <div className="bg-[#0F5D4E]/5 rounded-lg p-4">
+                      <span className="text-[#0F5D4E] text-xs font-medium">Joined</span>
+                      <div className="text-[#0A3D32] font-medium">
+                        {new Date(selectedUser.date_joined).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Referrer Details Modal */}
+        {selectedReferrer && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-[#0F5D4E]">Referred Users by {selectedReferrer.referrerEmail || selectedReferrer.referrer}</h3>
+                  <button
+                    onClick={() => setSelectedReferrer(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedReferrer.referrals.map((ref, refIdx) => {
+                    const referredUser = users.find(u => u.email === ref.referred_email);
+                    return (
+                      <div key={refIdx} className="bg-[#0F5D4E]/5 rounded-lg p-4 border border-[#0F5D4E]/20">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <button
+                              onClick={() => referredUser && showUserProfile(referredUser)}
+                              className="text-[#0A3D32] font-medium hover:text-[#0F5D4E] transition-colors text-left"
+                              disabled={!referredUser}
+                            >
+                              {ref.referred_email || ref.referred_full_name || 'Unknown'}
+                              {referredUser && <Eye size={14} className="inline ml-1" />}
+                            </button>
+                            <div className="text-[#0A3D32] text-sm">
+                              {ref.created_at ? new Date(ref.created_at).toLocaleDateString() : '-'}
+                            </div>
+                          </div>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            ref.completed ? 'bg-[#0F5D4E]/20 text-[#0A3D32]' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {ref.completed ? 'Completed' : 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

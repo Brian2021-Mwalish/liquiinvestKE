@@ -224,6 +224,7 @@ class SessionListView(APIView):
             }]
         }, status=status.HTTP_200_OK)
 
+
 # -----------------------
 # Forgot Password
 # -----------------------
@@ -238,34 +239,63 @@ class ForgotPasswordView(APIView):
         try:
             user = CustomUser.objects.get(email=email)
         except CustomUser.DoesNotExist:
-            return Response({"error": "User with this email does not exist."},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = token_generator.make_token(user)
-        reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
-        logger.info(f"Password reset link generated for user {user.email}: {reset_link}")
-        print(f"Password reset link generated for user {user.email}: {reset_link}")
+            # For security, return success even if user doesn't exist
+            return Response({"message": "Password reset email sent."}, status=status.HTTP_200_OK)
 
         try:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
+            reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
+            logger.info(f"Password reset link generated for user {user.email}: {reset_link}")
+            print(f"Password reset link generated for user {user.email}: {reset_link}")
+
+            # Check if email settings are configured
+            if not hasattr(settings, 'EMAIL_HOST') or not settings.EMAIL_HOST:
+                logger.error("Email settings not configured")
+                return Response({"error": "Email service not configured properly."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             send_mail(
-                subject="Password Reset Request",
-                message=f"Click the link to reset your password: {reset_link}",
+                subject="Password Reset Request - LiquiInvest",
+                message=f"""Hello {user.full_name},
+
+You have requested to reset your password for your LiquiInvest account.
+
+Click the link below to reset your password:
+{reset_link}
+
+This link will expire in 15 minutes.
+
+If you did not request this password reset, please ignore this email.
+
+Best regards,
+LiquiInvest Team""",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[email],
                 fail_silently=False,
             )
+            logger.info(f"Reset email sent successfully to {email}")
+            
         except Exception as e:
             logger.error(f"Failed to send reset email: {str(e)}")
+            # For development, you might want to return the reset link directly
+            if settings.DEBUG:
+                return Response({
+                    "message": "Password reset email sent.",
+                    "debug_reset_link": reset_link  # Only in debug mode
+                }, status=status.HTTP_200_OK)
             return Response({"error": "Failed to send reset email."},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "Password reset email sent."}, status=status.HTTP_200_OK)
 
+
 # -----------------------
 # Reset Password
 # -----------------------
 class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -277,7 +307,6 @@ class ResetPasswordView(APIView):
             return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Token is valid."}, status=status.HTTP_200_OK)
-    permission_classes = [AllowAny]
 
     def post(self, request, uidb64, token):
         password = request.data.get("password")
@@ -536,6 +565,7 @@ def admin_award_wallet(request, user_id):
     except CustomUser.DoesNotExist:
         return Response({"error": "User not found."}, status=404)
 
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def kyc_forms_list(request):
@@ -544,3 +574,94 @@ def kyc_forms_list(request):
     kyc_forms = KYCProfile.objects.exclude(email=admin_email)
     serializer = KYCProfileSerializer(kyc_forms, many=True)
     return Response({'kyc_forms': serializer.data})
+
+# -----------------------
+# Delete Account
+# -----------------------
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user_email = user.email
+        user_full_name = user.full_name
+        
+        try:
+            # Log the deletion attempt
+            logger.info(f"Account deletion initiated for user: {user_email}")
+            
+            # Delete related data in proper order to avoid foreign key constraints
+            
+            # 1. Delete KYC profiles
+            KYCProfile.objects.filter(user=user).delete()
+            logger.info(f"KYC profile deleted for user: {user_email}")
+            
+            # 2. Delete referrals where user is the referrer
+            referrals_made = Referral.objects.filter(referrer=user)
+            referrals_count = referrals_made.count()
+            referrals_made.delete()
+            logger.info(f"Deleted {referrals_count} referrals made by user: {user_email}")
+            
+            # 3. Delete referrals where user is the referred user
+            referrals_received = Referral.objects.filter(referred=user)
+            referrals_received_count = referrals_received.count()
+            referrals_received.delete()
+            logger.info(f"Deleted {referrals_received_count} referrals received by user: {user_email}")
+            
+            # 4. Delete rental records
+            try:
+                from rentals.models import Rental
+                rentals = Rental.objects.filter(user=user)
+                rentals_count = rentals.count()
+                rentals.delete()
+                logger.info(f"Deleted {rentals_count} rentals for user: {user_email}")
+            except ImportError:
+                logger.warning("Rentals app not available for cleanup")
+            
+            # 5. Delete payment records
+            try:
+                from payment.models import Payment
+                payments = Payment.objects.filter(user=user)
+                payments_count = payments.count()
+                payments.delete()
+                logger.info(f"Deleted {payments_count} payments for user: {user_email}")
+            except ImportError:
+                logger.warning("Payment app not available for cleanup")
+            
+            # 6. Delete withdrawal records
+            try:
+                from withdrawal.models import Withdrawal
+                withdrawals = Withdrawal.objects.filter(user=user)
+                withdrawals_count = withdrawals.count()
+                withdrawals.delete()
+                logger.info(f"Deleted {withdrawals_count} withdrawals for user: {user_email}")
+            except ImportError:
+                logger.warning("Withdrawal app not available for cleanup")
+            
+            # 7. Delete user sessions
+            try:
+                from .models import UserSession
+                sessions = UserSession.objects.filter(user=user)
+                sessions_count = sessions.count()
+                sessions.delete()
+                logger.info(f"Deleted {sessions_count} user sessions for user: {user_email}")
+            except ImportError:
+                logger.warning("UserSession model not available for cleanup")
+            
+            # 8. Finally, delete the user account
+            user.delete()
+            logger.info(f"User account successfully deleted: {user_email} ({user_full_name})")
+            
+            return Response({
+                "message": "Account successfully deleted",
+                "deleted_user": {
+                    "email": user_email,
+                    "full_name": user_full_name
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error deleting account for user {user_email}: {str(e)}")
+            return Response({
+                "error": "Failed to delete account. Please contact support."
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

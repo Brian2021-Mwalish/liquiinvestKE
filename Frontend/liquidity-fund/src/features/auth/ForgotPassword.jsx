@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
-import { Mail, Send, CheckCircle, ArrowLeft } from "lucide-react";
+
+import { Mail, Send, CheckCircle, ArrowLeft, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL } from "../../lib/api";
 
@@ -112,66 +113,63 @@ const ForgotPassword = () => {
 
   if (isEmailSent) {
     return (
-      <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-indigo-100 via-white to-blue-100 flex items-center justify-center p-2 sm:p-4 lg:p-6 overflow-hidden">
-        {/* Dynamic background elements */}
-        <div 
-          className="absolute inset-0 opacity-20 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.1) 0%, transparent 50%)`
-          }}
-        />
-        
-        <div className={`w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-4 sm:space-y-6 lg:space-y-8 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="mb-2">
-            <NavigationArrow label="Back to Home" to="/" />
+      <div className="min-h-screen bg-[#0F5D4E] p-3 sm:p-4 md:p-6 page-transition flex items-center justify-center">
+        {/* Back Arrow */}
+        <Link
+          to="/"
+          className="fixed top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 flex items-center gap-1.5 sm:gap-2 bg-[#0A3D32] text-white px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-[#083028] transition z-50 text-xs sm:text-sm md:text-base"
+          style={{ textDecoration: "none" }}
+        >
+          <ArrowLeft size={16} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
+          <span className="font-semibold hidden xs:inline">Back to Home</span>
+          <span className="font-semibold xs:hidden">Back</span>
+        </Link>
+
+        <div className={`w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 border-4 border-[#0F5D4E] relative animate-fade-in text-center`}>
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-[#0A3D32] rounded-full flex items-center justify-center animate-pulse">
+              <CheckCircle className="text-white" size={32} />
+            </div>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-4 sm:p-6 lg:p-8 transform transition-all duration-500 hover:shadow-2xl text-center">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-pulse">
-                <CheckCircle className="text-green-600" size={32} />
-              </div>
-            </div>
-            
-            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-              Email Sent!
-            </h2>
-            
-            <p className="text-gray-600 mb-4">
-              We've sent a password reset link to:
-            </p>
-            
-            <p className="font-semibold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg mb-6">
-              {sentEmail}
-            </p>
-            
-            <p className="text-sm text-gray-600 mb-6">
-              Check your inbox and click the link to reset your password. The link will expire in 15 minutes.
-            </p>
-            
-            <div className="space-y-3">
-              <button
-                onClick={handleResendEmail}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:-translate-y-1 hover:shadow-xl transform hover:scale-105"
-              >
-                Resend Email
-              </button>
-              
-              <button
-                onClick={resetForm}
-                className="w-full bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 hover:bg-gray-200 hover:-translate-y-1 hover:shadow-md transform hover:scale-105"
-              >
-                Try Different Email
-              </button>
-              
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center w-full text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 hover:underline text-sm sm:text-base py-2"
-              >
-                <ArrowLeft size={16} className="mr-2" />
-                Back to Sign In
-              </Link>
-            </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#0F5D4E] mb-4">
+            Email Sent!
+          </h2>
+
+          <p className="text-[#0F5D4E] mb-4">
+            We've sent a password reset link to:
+          </p>
+
+          <p className="font-semibold text-[#0F5D4E] bg-[#A8E6CF]/20 px-4 py-2 rounded-lg mb-6">
+            {sentEmail}
+          </p>
+
+          <p className="text-sm text-[#0F5D4E] mb-6">
+            Check your inbox and click the link to reset your password. The link will expire in 15 minutes.
+          </p>
+
+          <div className="space-y-3">
+            <button
+              onClick={handleResendEmail}
+              className="w-full bg-[#0F5D4E] text-white py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-[#0A3D32] transition shadow-md"
+            >
+              Resend Email
+            </button>
+
+            <button
+              onClick={resetForm}
+              className="w-full bg-white text-[#0F5D4E] border-2 border-[#0F5D4E] py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-[#A8E6CF]/10 transition"
+            >
+              Try Different Email
+            </button>
+
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center w-full text-[#0F5D4E] hover:text-[#0A3D32] font-medium transition-colors duration-200 hover:underline text-sm sm:text-base py-2"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back to Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -179,57 +177,48 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-indigo-100 via-white to-blue-100 flex items-center justify-center p-2 sm:p-4 lg:p-6 overflow-hidden">
-      {/* Dynamic background elements */}
-      <div 
-        className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.1) 0%, transparent 50%)`
-        }}
-      />
-      
-      <div className={`w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-4 sm:space-y-6 lg:space-y-8 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <div className="mb-2">
-          <NavigationArrow label="Back to Home" to="/" />
-        </div>
+    <div className="min-h-screen bg-[#0F5D4E] p-3 sm:p-4 md:p-6 page-transition">
+      {/* Back Arrow */}
+      <Link
+        to="/"
+        className="fixed top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 flex items-center gap-1.5 sm:gap-2 bg-[#0A3D32] text-white px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-[#083028] transition z-50 text-xs sm:text-sm md:text-base"
+        style={{ textDecoration: "none" }}
+      >
+        <ArrowLeft size={16} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
+        <span className="font-semibold hidden xs:inline">Back to Home</span>
+        <span className="font-semibold xs:hidden">Back</span>
+      </Link>
 
-        <div className="text-center transform transition-all duration-300 hover:scale-105">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Mail className="text-blue-600 animate-pulse" size={24} />
-            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Forgot Password
-            </h2>
+
+      {/* Centered Form */}
+      <div className="flex items-center justify-center min-h-[calc(100vh-6rem)]">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 border-4 border-[#0F5D4E] relative animate-fade-in">
+          {/* Header */}
+          <div className="text-center pt-2 sm:pt-4">
+            <div className="flex justify-center items-center gap-2">
+              <Mail className="text-[#0F5D4E] animate-pulse w-5 h-5 sm:w-6 sm:h-6" />
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0F5D4E]">Forgot Password</h2>
+              <Send className="text-[#0F5D4E] animate-bounce w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <p className="text-[#0F5D4E] text-xs sm:text-sm mt-1">Enter your email to reset your password</p>
           </div>
-          <p className="text-sm sm:text-base text-gray-600 transition-colors duration-300 hover:text-gray-800">
-            Enter your email to receive a password reset link
-          </p>
-        </div>
 
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-4 sm:p-6 lg:p-8 transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
-            <div className="group">
-              <label className="block mb-2 font-semibold text-gray-700 text-xs sm:text-sm">
-                Email Address
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-[#0F5D4E] flex items-center gap-1 mb-1">
+                <Mail size={14} /> Email Address
               </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  {...register("email")}
-                  className={`w-full px-3 sm:px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 text-sm sm:text-base transition-all duration-300 pl-10 ${
-                    errors.email
-                      ? "border-red-400 focus:ring-red-300 bg-red-50"
-                      : "border-gray-300 focus:ring-blue-300 focus:border-blue-400 bg-gray-50 hover:bg-white hover:border-gray-400"
-                  }`}
-                  placeholder="Enter your email address"
-                />
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-              </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1 animate-pulse flex items-center gap-1">
-                  {errors.email.message}
-                </p>
-              )}
-              
+              <input
+                type="email"
+                {...register("email")}
+                placeholder="your.email@example.com"
+                className={`w-full px-3 py-2 sm:py-2.5 border-2 rounded-lg focus:ring-2 focus:ring-[#0F5D4E] focus:outline-none text-sm ${
+                  errors.email ? "border-red-400 bg-red-50" : "border-[#0F5D4E]/40 bg-white"
+                }`}
+              />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
               {watchedEmail && !errors.email && (
                 <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                   <CheckCircle size={12} />
@@ -238,52 +227,72 @@ const ForgotPassword = () => {
               )}
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 sm:py-3.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:-translate-y-1 hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
+              className="w-full bg-[#0F5D4E] text-white py-2 sm:py-2.5 rounded-lg font-semibold text-sm hover:bg-[#0A3D32] transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-md"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 flex items-center justify-center gap-2">
-                {isSubmitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send size={16} />
-                    Send Reset Link
-                  </>
-                )}
-              </div>
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <Send size={16} />
+                  <span>Send Reset Link</span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center space-y-3">
-            <p className="text-sm text-gray-600">Remember your password?</p>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center w-full font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200 hover:underline text-sm sm:text-base py-2"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Back to Sign In
-            </Link>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <p className="text-sm sm:text-base text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200 hover:underline"
-            >
-              Register here
+          {/* Register Link */}
+          <p className="text-center text-xs sm:text-sm text-[#0F5D4E]">
+            Remember your password?{" "}
+            <Link to="/login" className="text-[#0F5D4E] hover:text-[#0A3D32] hover:underline font-semibold">
+              Sign In
             </Link>
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slide-up {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          from { transform: translateX(-30px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+
+        .page-transition {
+          animation: fade-in 0.3s ease-in;
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        .animate-slide-up {
+          animation: slide-up 1s ease-out;
+        }
+        .animate-slide-up-delayed {
+          animation: slide-up 1s ease-out 0.2s both;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.8s ease-out;
+        }
+        .animate-slide-in-left-delayed {
+          animation: slide-in-left 0.8s ease-out 0.2s both;
+        }
+        .animate-slide-in-left-delayed-2 {
+          animation: slide-in-left 0.8s ease-out 0.4s both;
+        }
+      `}</style>
     </div>
   );
 };

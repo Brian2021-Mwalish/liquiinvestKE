@@ -143,6 +143,25 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.liquiinvestke.co.ke",
     "http://localhost:5173"
 ]
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 # ------------------------------------------------------------
 # CSRF & SESSION SECURITY
@@ -161,6 +180,7 @@ SESSION_COOKIE_SAMESITE = "None"
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
+
 # ------------------------------------------------------------
 # EMAIL (GMAIL SMTP)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -170,6 +190,10 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
+
+# ------------------------------------------------------------
+# FRONTEND URL
+FRONTEND_URL = config("FRONTEND_URL", default="https://front.liquiinvestke.co.ke")
 
 # ------------------------------------------------------------
 # M-PESA CONFIG

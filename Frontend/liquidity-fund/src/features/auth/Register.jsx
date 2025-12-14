@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, User, Mail, Lock, ArrowLeft, Sparkles, Shield, TrendingUp, Gift } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, AlertCircle, User, Mail, Lock, ArrowLeft, Sparkles, Shield, TrendingUp, Gift } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const schema = yup.object().shape({
@@ -37,7 +37,7 @@ const Register = () => {
   const referralCode = searchParams.get("referral_code");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const {
@@ -75,8 +75,6 @@ const Register = () => {
   const passwordStrength = getPasswordStrength(watchedPassword);
 
   const onSubmit = async (formData) => {
-    setLoading(true);
-    toast.loading("Creating your account, please wait...", { id: "register" });
     const { confirmPassword, ...payload } = formData;
     if (referralCode) {
       payload.referral_code = referralCode;
@@ -125,28 +123,19 @@ const Register = () => {
           });
         } else {
           toast.error("Registration failed. Please check your information and try again.", {
-            id: "register",
             duration: 4000
           });
         }
-        toast.dismiss("register");
-        setLoading(false);
         return;
       } else {
-        toast.dismiss("register");
         setShowSuccessModal(true);
-        setLoading(false);
       }
     } catch (error) {
       const errorMessage = error.message || "We're experiencing technical difficulties. Please try again.";
       toast.error(errorMessage, {
-        id: "register",
         duration: 5000,
         icon: <AlertCircle className="text-red-500" />
       });
-      toast.dismiss("register");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -413,7 +402,7 @@ const Register = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || isSubmitting || !isValid}
+                disabled={isSubmitting || !isValid}
                 className="w-full py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl mt-1"
                 style={{
                   backgroundColor: "#0F5D4E",
@@ -421,17 +410,8 @@ const Register = () => {
                 }}
               >
                 <div className="flex items-center justify-center gap-2">
-                  {loading ? (
-                    <>
-                      <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Create Account
-                    </>
-                  )}
+                  <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Create Account
                 </div>
               </button>
             </form>

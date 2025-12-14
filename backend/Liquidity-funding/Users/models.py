@@ -51,6 +51,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     date_joined = models.DateTimeField(default=timezone.now)
 
+
+
     # Referral system
     referral_code = models.CharField(max_length=12, unique=True, blank=False, null=False, default=generate_referral_code)
     referred_by = models.ForeignKey(
@@ -60,7 +62,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         on_delete=models.SET_NULL,
         related_name="referrals"
     )
-    wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     # Admin flags
     is_active = models.BooleanField(default=True)
@@ -70,6 +71,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["full_name"]
+
+
 
     def save(self, *args, **kwargs):
         # Auto-generate referral code if missing or blank
@@ -87,6 +90,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 # -----------------------
 # Referral Model
 # -----------------------
+
 class Referral(models.Model):
     referrer = models.ForeignKey(
         CustomUser,
@@ -108,7 +112,12 @@ class Referral(models.Model):
         choices=[("pending", "Pending"), ("completed", "Completed")],
         default="pending"
     )
-    reward = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    reward = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    
+    # Enhanced tracking fields
+    reward_given = models.BooleanField(default=False)  # Whether reward has been paid
+    rental_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  # Amount of rental that triggered reward
+    reward_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  # Actual reward amount (50% of rental)
 
     class Meta:
         unique_together = ("referrer", "referred_email")

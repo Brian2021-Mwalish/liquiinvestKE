@@ -44,6 +44,7 @@ class WithdrawalRequestView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+
             try:
                 wallet = Wallet.objects.get(user=user)
             except Wallet.DoesNotExist:
@@ -51,13 +52,14 @@ class WithdrawalRequestView(APIView):
                     {"error": "Wallet not found."}, status=status.HTTP_404_NOT_FOUND
                 )
 
-            if wallet.balance < amount:
+            # Check available balance only (not rental balance)
+            if not wallet.can_withdraw(amount):
                 return Response(
-                    {"error": "Insufficient balance."},
+                    {"error": f"Insufficient available balance. Available: {wallet.available_balance}, Locked in Rentals: {wallet.locked_rental_balance}"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Deduct immediately (reserve funds)
+            # Deduct immediately from available balance (reserve funds)
             wallet.balance -= amount
             wallet.save()
 
